@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "hip-limiter-377219",
+  "private_key_id": "c6a3acfffce5583701f52af51c7ba49ee34e7eff",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDFTe3rjnDi68jB\n1XodIDJ3F/RgL0vRbeZhO8c+ldCu39i/E2ByXMGuWrWRa4dlyz9Mo+zth8uUhcMh\nhQpqnFCA+fc+/gW8TRGlSz576KIk449Cdds3YHMTzzCUCGLo6SvtuS12KUbiCvXB\n14El8IcFFBXh/e3gmprAcBSBK/xJwBqap2UZP/FDMRBXSN+NJjy4bRzlEZAZ/ZGu\nrxzD4/FpT0j3w2OM5MTdG3YS08RQpl97uIL2m/TDp3NXFjgR7QH0f+ojDSag4iRk\n0SMxbtI1PgCmH6ptREIlDM0hJ6vcI2m4RnN1LqzUyJ3gt0mUf4t+wy1vhh6LYzyz\n+MiG+RTtAgMBAAECggEADC6sHou8d55kVmeGcy7uPsE5Ywj4jvVQsLc+raQVbv6+\nRMn+/gCxKsFKDbEMeqIKhgJnGiF01fZOXo723i9JnzUP6ZFIrGA70y9qq77o6Asu\n6MUbJHetk08LKlC8PrJK9pIk9vNEf6d6lh3myP9pbsxXL418tw4EuRYShgk/uhPp\nE/2yhvtbOzkSP7A8ugz4WVzKM5EB8ZKvcq+1Wr99hbFCilLtJUxroOO+8H0wI7OD\nkwfTIiKwOoNe2q9037tpefgFeoJJS/qCRRAkgcB61mOHffRPmvEKToJAC4kX5EVy\nzeHvRqYkTv/pMgfvb3RNq5BNaQoajhGscN6myNSl9wKBgQD1fkiJhiv5AIUDjgzA\n5546jn1/iOxWe5Uyw4TDC8Wj6slD+j9R9z4KI6XtyODme5ywsCDtmwbBc+rB4sRx\nTM63oKzvRbQgsV0zsfPylNUTo2tE5BuX2a1otFEfWDWj15kpQtW8F9banlagWtXO\nQ9j+kHj1B2PAciV6kBC0l/Tw/wKBgQDNv6uo42ZTpBypolP5zvUFBXSHivKtEkzZ\ncEOfP+zwc8AtMIp12DuopI7hcgTLPUnAmfesAkvSeOqBTnezJWONRNSgzj4NmwKZ\ne+SGLwb3CqKg1wAlegVri/cEgKgssCe+fg+QQwe7HLbfgfM6wrOTO+rRrNaye4o2\ngz2J3CLOEwKBgC4PK3zh944YUtx/4lSvIDjMUy+CeRUgyrVjiZ0usD445toiMY8n\nXDR6y775WXjk6FkeMo9h7rqNDRajfUfkqUQ6mTerVEht/pacZLC2y+OLXaznP2YW\nKTrj2fSPkEDVSp87Mu6/akhKPOaJJGQ2xpe8c3VFlamdwPpl3TyE5ifxAoGAO0aK\nLQj+lQBF5bVHnkO6oWy16srkKWqJS2elg77GA2xFpH9ElLjsTyTBqT/RE8Cfe+af\nzSWINKXzYbd6ktklujBnVcC1bfQHprJj3yizR/7/ZXkrqKBj6V0UmG58hQtnF+F3\nmGdHVefq46+rpHUtiTCM8UVrQVaINjZPR2VtfZMCgYAyPhE3K6nSA4ni1g3la7sd\n9AUAOIzJ+wCmu9fAuTwceuX3X+NptRiMNiomYow/FYAYBCyJ3SDkC0bmNMveLU55\nbznIt+2cVPlJV3xWyHqPb2UhRUxaq0z9b43xbRZRiq0mCCyjJiYl3j5+Y7922JIh\nPZwlQEtaeYp7211UuBpUAg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "ethereumnft@hip-limiter-377219.iam.gserviceaccount.com",
+  "client_id": "107828489070788428384",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ethereumnft%40hip-limiter-377219.iam.gserviceaccount.com"
+}
