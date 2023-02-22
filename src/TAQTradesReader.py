@@ -45,6 +45,12 @@ class TAQTradesReader(object):
     def getSize( self, index ):
         return self._s[ index ]
     
+    def setPrice( self, index , value):
+        self._p[ index ] = value
+    
+    def setSize( self, index, value ):
+        self._s[ index ] = value
+    
     def rewrite( self, filePathName, tickerId ):
         s = struct.Struct( ">QHIf" ) 
         out = gzip.open( filePathName, "wb" )
@@ -53,5 +59,15 @@ class TAQTradesReader(object):
             ts = baseTS + self.getMillisFromMidn( i )
             out.write( s.pack( ts, tickerId, self.getSize(i), self.getPrice(i) ) )
         out.close()
+
+
+    def rewrite( self, filePathName):
+        s = struct.Struct( ">QHIf" ) 
+        out = gzip.open( filePathName, "wb" )
+        for i in range( self.getN() ):
+            out.write( s.pack( self.getSecsFromEpocToMidn(), self.getN(), self.getMillisFromMidn(i), \
+                              self.getSize(i), self.getPrice(i)) )
+        out.close()
+
     
     
