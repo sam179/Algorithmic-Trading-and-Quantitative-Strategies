@@ -2,6 +2,9 @@ import MyDirectories
 from FileManager import FileManager
 import pandas as pd
 import BaseUtils as bu
+import shutil
+from collections import deque
+import os
 cfap = 'Cumulative Factor to Adjust Prices'
 cfas = 'Cumulative Factor to Adjust Shares/Vol' 
 
@@ -32,23 +35,40 @@ class TAQAdjust():
         for ticker in tickers:
             priceFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfap]].set_index("Names Date")
             shareFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfas]].set_index("Names Date")
-            pricechange = priceFactors.loc[Dates[0], cfap] == priceFactors.loc[Dates[-1], cfap]
-            sharechange = shareFactors.loc[Dates[0], cfas] == shareFactors.loc[ Dates[-1], cfas]
+            pricechange = priceFactors.loc[Dates[0], cfap] != priceFactors.loc[Dates[-1], cfap]
+            sharechange = shareFactors.loc[Dates[0], cfas] != shareFactors.loc[Dates[-1], cfas]
 
+            for date in Dates:
+               if not os.path.isdir(MyDirectories.getTradesAdjDir() / date):
+                     os.makedirs(MyDirectories.getTradesAdjDir() / date)
+
+               if (not pricechange) and (not sharechange):
+                  shutil.copy(MyDirectories.getTradesDir() / date / (ticker + '_trades.BinRT'), MyDirectories.getTradesAdjDir() / date /"")
+                  continue
+
+               tradeData = self._fm.getTradesFile( date, ticker )
+               prices = []
+               shares = []
+               ts = []      
+
+               for index in range(tradeData.getN()):
+                  ts.append(tradeData.getMillisFromMidn(index))
+                  prices.append(tradeData.getPrice(index))
+                  shares.append(tradeData.getSize(index))
+
+                  if pricechange:
+                     prices[-1] = prices[-1] / priceFactors.loc[date,cfap]
+
+                  if sharechange:
+                     shares[-1] = int(shares[-1] * shareFactors.loc[date, cfas])
+
+               bu.writeToBinTrades(MyDirectories.getTradesAdjDir() / date / (ticker + '_trades.BinRT'), \
+                             [tradeData.getSecsFromEpocToMidn(), tradeData.getN()],\
+                             [ts, shares, prices])            
+            
+            
             if pricechange or sharechange:
-               updatedTicker.append(ticker)
-
-            for date in dates:
-                tradeData = self._fm.getTradesFile( date, ticker )
-                if pricechange:
-                   for index in range(tradeData.getN()):
-                       tradeData.setPrice(index, tradeData.getPrice(index) / priceFactors.loc[date,cfap])
-
-                if sharechange:
-                   for index in range(tradeData.getN()):
-                       tradeData.setSize(index, tradeData.getSize(index) * shareFactors.loc[date, cfas])
-
-                tradeData.rewrite(MyDirectories.BinRTTradesAdjDir / date / (ticker + '_trades.binRT'))
+               updatedTicker.append(ticker)    
 
         return updatedTicker 
 
@@ -64,29 +84,50 @@ class TAQAdjust():
         Dates = self._fm.getQuoteDates(dates[0], dates[1])
         updatedTicker = []
         for ticker in tickers:
-            priceFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfap]].set_index('Names Date')
-            shareFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfas]].set_index('Names Date')
-            pricechange = priceFactors.loc[Dates[0]] == priceFactors[Dates[-1]]
-            sharechange = shareFactors.loc[Dates[0]] == shareFactors[Dates[-1]]
+            priceFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfap]].set_index("Names Date")
+            shareFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfas]].set_index("Names Date")
+            pricechange = priceFactors.loc[Dates[0], cfap] != priceFactors.loc[Dates[-1], cfap]
+            sharechange = shareFactors.loc[Dates[0], cfas] != shareFactors.loc[Dates[-1], cfas]
+
+            for date in Dates:
+               if not os.path.isdir(MyDirectories.getQuotesAdjDir() / date):
+                     os.makedirs(MyDirectories.getQuotesAdjDir() / date)
+
+               if (not pricechange) and (not sharechange):
+                  shutil.copy(MyDirectories.getQuotesDir() / date / (ticker + '_quotes.BinRQ'), MyDirectories.getQuotesAdjDir() / date /"")
+                  continue
+
+               tradeData = self._fm.getQuotesFile( date, ticker )
+               bidprices = []
+               bidsize = []
+               askprices = []
+               asksize = []
+               ts = []      
+
+               for index in range(tradeData.getN()):
+                  ts.append(tradeData.getMillisFromMidn(index))
+                  bidprices.append(tradeData.getBidPrice(index))
+                  bidsize.append(tradeData.getBidSize(index))
+                  askprices.append(tradeData.getAskPrice(index))
+                  asksize.append(tradeData.getAskSize(index))
+
+                  if pricechange:
+                     bidprices[-1] = bidprices[-1] / priceFactors.loc[date,cfap]
+                     askprices[-1] = askprices[-1] / priceFactors.loc[date,cfap]
+
+                  if sharechange:
+                     bidsize[-1] = int(bidsize[-1] * shareFactors.loc[date, cfas])
+                     asksize[-1] = int(asksize[-1] * shareFactors.loc[date, cfas])
+
+               bu.writeToBinQuotes(MyDirectories.getQuotesAdjDir() / date / (ticker + '_quotes.BinRQ'), \
+                             [tradeData.getSecsFromEpocToMidn(), tradeData.getN()],\
+                             [ts, asksize, askprices, bidsize, bidprices])            
+            
             
             if pricechange or sharechange:
-               updatedTicker.append(ticker)
+               updatedTicker.append(ticker)    
 
-            for date in dates:
-                quoteData = self._fm.getQuotesFile( date, ticker )
-                if pricechange:
-                   for index in range(quoteData.getN()):
-                       quoteData.setBidPrice(index, quoteData.getBidPrice(index) / pricechange.loc[date])
-                       quoteData.setAskPrice(index, quoteData.getAskPrice(index) / pricechange.loc[date])
-
-                if sharechange:
-                   for index in range(quoteData.getN()):
-                       quoteData.setBidSize(index, quoteData.getBidSize(index) * sharechange.loc[date])
-                       quoteData.setAskSize(index, quoteData.getAskSize(index) * sharechange.loc[date])
-
-                quoteData.rewrite(MyDirectories.BinRQQuotesAdjDir / date / (ticker + '_quotes.binRQ'))
-
-        return updatedTicker            
+        return updatedTicker             
 
 
 

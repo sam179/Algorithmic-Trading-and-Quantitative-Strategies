@@ -64,31 +64,3 @@ class TAQQuotesReader(object):
     def getBidPrice( self, index ):
         return self._bp[ index ]
     
-    def setAskSize( self, index, value ):
-        self._as[ index ] = value
-    
-    def setAskPrice( self, index, value ):
-        self._ap[ index ] = value
-
-    def setBidSize( self, index, value ):
-        self._bs[ index ] = value
-    
-    def setBidPrice( self, index, value ):
-        self._bp[ index ] = value
-
-    def rewrite( self, filePathName, tickerId):
-        s = struct.Struct( ">QHIf" ) 
-        out = gzip.open( filePathName, "wb" )
-        baseTS = self.getSecsFromEpocToMidn() * 1000
-        for i in range( self.getN() ):
-            ts = baseTS + self.getMillisFromMidn( i )
-            out.write( s.pack( ts, tickerId, self.getBidSize(i), self.getBidPrice(i),  self.getAskSize(i), self.getAskPrice(i)) )
-        out.close()
-
-    def rewrite( self, filePathName):
-        s = struct.Struct( ">QHIf" ) 
-        out = gzip.open( filePathName, "wb" )
-        for i in range( self.getN() ):
-            out.write( s.pack( self.getSecsFromEpocToMidn(), self.getN(), self.getMillisFromMidn(i), \
-                              self.getBidSize(i) ,self.getBidPrice(i),  self.getAskSize(i), self.getAskPrice(i)) )
-        out.close()
