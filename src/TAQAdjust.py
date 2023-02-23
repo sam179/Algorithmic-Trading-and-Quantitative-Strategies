@@ -28,7 +28,7 @@ class TAQAdjust():
            dates = [bu.startDate, bu.endDate]
 
         if tickers == None:
-           tickers =  set(self._snp['Ticker Symbol'].to_list())
+           tickers =  set(self._snp['Ticker Symbol'].dropna().to_list())
        
         Dates = self._fm.getTradeDates(dates[0], dates[1])
         updatedTicker = []
@@ -79,10 +79,11 @@ class TAQAdjust():
            dates = [bu.startDate, bu.endDate]
 
         if tickers == None:
-           tickers =  set(self._snp['Ticker Symbol'].to_list())
-       
+           tickers =  set(self._snp['Ticker Symbol'].dropna().to_list())
+           
         Dates = self._fm.getQuoteDates(dates[0], dates[1])
         updatedTicker = []
+
         for ticker in tickers:
             priceFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfap]].set_index("Names Date")
             shareFactors = self._snp.loc[self._snp['Ticker Symbol'] == ticker, ['Names Date', cfas]].set_index("Names Date")
@@ -128,6 +129,7 @@ class TAQAdjust():
                updatedTicker.append(ticker)    
 
         return updatedTicker             
+
 
 
 

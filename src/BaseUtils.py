@@ -1,6 +1,7 @@
 import pandas as pd
 import gzip
 import struct
+from matplotlib import pyplot as plt
 
 startDate = "20070919"
 endDate = "20070921"
@@ -37,3 +38,35 @@ def writeToBinTrades(filename,header,data):
         f.write(d)
         d = struct.pack( ( ">%df" % header[ 1 ]), *data[2] )
         f.write(d)
+
+
+def plotTrades(dataO, dataM, tickers, title, filename=None):
+    ts = []
+    prices1 = []
+    prices2 = []
+    size1 = []
+    size2 = []
+
+    if(dataO.getN() != dataM.getN()):
+       raise("Data sizes are different.")
+
+    for index in range(dataO.getN()):
+        ts.append(dataO.getMillisFromMidn(index))
+        prices1.append(dataO.getPrice(index))
+        prices2.append(dataM.getPrice(index))
+        size1.append(dataO.getSize(index))
+        size2.append(dataM.getSize(index))
+
+    fig, (ax1,ax2) = plt.subplot(2)
+    ax1.plot(ts, prices1)
+    ax1.plot(ts, prices2)
+    ax1.set_title("Prices : " + title)
+    ax1.legend(tickers)
+    ax2.plot(ts, size1)
+    ax2.plot(ts, size2)
+    ax2.set_title("Shares : " + title)
+    ax2.legend(tickers)
+    plt.show()
+    if filename: fig.savefig(filename)
+
+    
