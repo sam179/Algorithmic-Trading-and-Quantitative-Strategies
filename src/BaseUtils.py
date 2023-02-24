@@ -5,6 +5,14 @@ from matplotlib import pyplot as plt
 import MyDirectories
 import os
 
+
+from TAQTradesReader import TAQTradesReader
+from TAQQuotesReader import TAQQuotesReader
+from FileManager import FileManager
+
+startDate = "20070919"
+endDate = "20070921"
+
 def readExcel(filename, index = None):
     if ".csv" == filename.suffix:
         return pd.read_csv(filename, index_col = index)
@@ -116,3 +124,39 @@ snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
 snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
 snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
 default_dates = ["20070620", "20070921"]
+
+
+def binToFrame(date,ticker,trade = 'True'):
+
+    '''Read data from bin to a dataframe'''
+    
+    baseDir = MyDirectories.getTAQDir()
+    fm = FileManager(baseDir)
+    if trade:
+        reader = fm.getTradesFile(date,ticker)
+        
+        data_dict = {
+
+            'time':pd.to_numeric(reader._ts),
+            'price':pd.to_numeric(reader._p),
+            'size':pd.to_numeric(reader._s)
+        }
+
+    else:
+        reader = fm.getQuotesFile(date,ticker)
+
+        data_dict = {
+            'time':pd.to_numeric(reader._ts),
+            'askPrice':pd.to_numeric(reader._ap),
+            'askSize':pd.to_numeric(reader._as),
+            'bidPrice':pd.to_numeric(reader._bp),
+            'bidSize':pd.to_numeric(reader._bs)
+        }
+    df = pd.DataFrame(data_dict)
+    df['time'] = pd.to_datetime(
+        df['time'],
+        unit = 'ms',
+        origin=pd.Timestamp(date)
+        )
+    return df
+
