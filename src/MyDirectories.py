@@ -6,7 +6,7 @@ cwd = Path(os.getcwd())
 class MyDirectories(object):
 
     TEMP_DIR = cwd / "tmp"
-    DATA_PATH = cwd / "data"
+    DATA_PATH = cwd / "data_orig"
     DATA_PATH_ADJ = cwd / "data_adj"
     DATA_PATH_CLEAN = cwd / "data_clean"
     BASE_DIR = cwd

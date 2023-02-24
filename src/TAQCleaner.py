@@ -1,16 +1,15 @@
 import MyDirectories
 from FileManager import FileManager
 import pandas as pd
-import BaseUtils as bu
 from collections import deque
 from statistics import mean, stdev
 import os
+import BaseUtils
 
 class TAQCleanTrades():
     
     def __init__(self, k = 5, tau = 0.0005):
        self._fm = FileManager( MyDirectories.getAdjDir())
-       self._snp = bu.readExcel(MyDirectories.getTAQDir() / "s&p500.csv").dropna()
        self._k = k
        self._tau = tau
        self._price = deque([],maxlen=self._k)
@@ -24,11 +23,8 @@ class TAQCleanTrades():
 
     def cleanAllTrades(self, dates = None, tickers = None):
         
-        if dates == None:
-           dates = [bu.startDate, bu.endDate]
-
-        if tickers == None:
-           tickers =  set(self._snp['Ticker Symbol'].dropna().to_list())
+        if not dates : dates = BaseUtils.default_dates
+        if not tickers : tickers = BaseUtils.snp_tickers
        
         Dates = self._fm.getTradeDates(dates[0], dates[1])
         for ticker in tickers:
@@ -37,11 +33,12 @@ class TAQCleanTrades():
                 prices = []
                 shares = []
                 ts = []
+                try:
+                    tradeData = self._fm.getTradesFile( date, ticker )
+                except:
+                    print(ticker, date, "FILE NOT FOUND")
+                    continue
 
-                if not os.path.isdir(MyDirectories.getTradesClDir() / date):
-                     os.makedirs(MyDirectories.getTradesClDir() / date)
-
-                tradeData = self._fm.getTradesFile( date, ticker )
                 tracker = 0
                 for index in range(tradeData.getN()):
 
@@ -74,8 +71,9 @@ class TAQCleanTrades():
                      shares.append(tradeData.getSize(tracker))
                      ts.append(tradeData.getMillisFromMidn(tracker))
                   tracker += 1 
-               
-                bu.writeToBinTrades(MyDirectories.getTradesClDir() / date / (ticker + '_trades.BinRT'), \
+
+                BaseUtils.mkDir(MyDirectories.getTradesClDir() / date)
+                BaseUtils.writeToBinTrades(MyDirectories.getTradesClDir() / date / (ticker + '_trades.binRT'), \
                            [tradeData.getSecsFromEpocToMidn(), len(prices)],\
                            [ts, shares, prices])
                 
@@ -85,7 +83,6 @@ class TAQCleanQuotes():
 
     def __init__(self, k = 5, tau = 0.0005):
        self._fm = FileManager( MyDirectories.getAdjDir())
-       self._snp = bu.readExcel(MyDirectories.getTAQDir() / "s&p500.csv").dropna()
        self._k = k
        self._tau = tau
        self._price1 = deque([],maxlen=self._k)
@@ -94,7 +91,6 @@ class TAQCleanQuotes():
     def setParams(self):
         self._mean1 = mean(self._price1)
         self._std1 = stdev(self._price1)
-
         self._mean2 = mean(self._price2)
         self._std2 = stdev(self._price2) 
 
@@ -103,15 +99,11 @@ class TAQCleanQuotes():
 
     def cleanAllQuotes(self, dates = None, tickers = None):
         
-        if dates == None:
-           dates = [bu.startDate, bu.endDate]
-
-        if tickers == None:
-           tickers =  set(self._snp['Ticker Symbol'].dropna().to_list())
+        if not dates : dates = BaseUtils.default_dates
+        if not tickers : tickers = BaseUtils.snp_tickers
        
         Dates = self._fm.getQuoteDates(dates[0], dates[1])
         for ticker in tickers:
-            
             for date in Dates:
                 bidprices = []
                 bidsize = []
@@ -119,10 +111,12 @@ class TAQCleanQuotes():
                 asksize = []
                 ts = []
 
-                if not os.path.isdir(MyDirectories.getQuotesClDir() / date):
-                     os.makedirs(MyDirectories.getQuotesClDir() / date)
+                try:
+                    quoteData = self._fm.getQuotesFile( date, ticker )
+                except:
+                    print(ticker, date, "FILE NOT FOUND")
+                    continue
 
-                quoteData = self._fm.getQuotesFile( date, ticker )
                 tracker = 0
                 for index in range(quoteData.getN()):
 
@@ -157,16 +151,17 @@ class TAQCleanQuotes():
                     tracker += 1
 
                 while(tracker < quoteData.getN()):
-                  if self.checkNotOutlier(quoteData.getBidPrice(tracker), self._mean1,self._std1) and \
-                     self.checkNotOutlier(quoteData.getAskPrice(tracker), self._mean2,self._std2): 
-                     bidprices.append(quoteData.getBidPrice(tracker))
-                     bidsize.append(quoteData.getBidSize(tracker))
-                     ts.append(quoteData.getMillisFromMidn(tracker))
-                     askprices.append(quoteData.getAskPrice(tracker))
-                     asksize.append(quoteData.getAskSize(tracker))
-                  tracker += 1 
-               
-                bu.writeToBinQuotes(MyDirectories.getQuotesClDir() / date / (ticker + '_quotes.BinRQ'), \
+                    if self.checkNotOutlier(quoteData.getBidPrice(tracker), self._mean1,self._std1) and \
+                        self.checkNotOutlier(quoteData.getAskPrice(tracker), self._mean2,self._std2): 
+                        bidprices.append(quoteData.getBidPrice(tracker))
+                        bidsize.append(quoteData.getBidSize(tracker))
+                        ts.append(quoteData.getMillisFromMidn(tracker))
+                        askprices.append(quoteData.getAskPrice(tracker))
+                        asksize.append(quoteData.getAskSize(tracker))
+                    tracker += 1 
+
+                BaseUtils.mkDir(MyDirectories.getQuotesClDir() / date)
+                BaseUtils.writeToBinQuotes(MyDirectories.getQuotesClDir() / date / (ticker + '_quotes.binRQ'), \
                            [quoteData.getSecsFromEpocToMidn(), len(bidprices)],\
                            [ts, bidsize, bidprices, asksize, askprices])
                 
