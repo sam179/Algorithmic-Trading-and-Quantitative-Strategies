@@ -2,10 +2,10 @@ import pandas as pd
 import gzip
 import struct
 from matplotlib import pyplot as plt
-import FileManager
 import MyDirectories
-import TAQTradesReader
-import TAQQuotesReader
+from TAQTradesReader import TAQTradesReader
+from TAQQuotesReader import TAQQuotesReader
+from FileManager import FileManager
 
 startDate = "20070919"
 endDate = "20070921"
@@ -74,32 +74,39 @@ def plotTrades(dataO, dataM, tickers, title, filename=None):
     if filename: fig.savefig(filename)
 
 
+
 def binToFrame(date,ticker,trade = 'True'):
+
     '''Read data from bin to a dataframe'''
+    
     baseDir = MyDirectories.getTAQDir()
     fm = FileManager(baseDir)
     if trade:
-        filename = fm.getTradesFile(date,ticker)
-        reader = TAQTradesReader(filename)
+        reader = fm.getTradesFile(date,ticker)
+        
         data_dict = {
-            'date':date,
-            'millsFromMidn':reader._ts,
-            'price':reader._p,
-            'size':reader._s
+
+            'time':pd.to_numeric(reader._ts),
+            'price':pd.to_numeric(reader._p),
+            'size':pd.to_numeric(reader._s)
         }
-        return pd.DataFrame(data_dict)
 
     else:
-        filename = fm.getQuotesFile(date,ticker)
-        reader = TAQQuotesReader(filename)
+        reader = fm.getQuotesFile(date,ticker)
+
         data_dict = {
-            'date':date,
-            'millsFromMidn':reader._ts,
-            'askPrice':reader._ap,
-            'askSize':reader._as,
-            'bidPrice':reader._bp,
-            'bidSize':reader._bs
+            'time':pd.to_numeric(reader._ts),
+            'askPrice':pd.to_numeric(reader._ap),
+            'askSize':pd.to_numeric(reader._as),
+            'bidPrice':pd.to_numeric(reader._bp),
+            'bidSize':pd.to_numeric(reader._bs)
         }
-        return pd.DataFrame(data_dict)
+    df = pd.DataFrame(data_dict)
+    df['time'] = pd.to_datetime(
+        df['time'],
+        unit = 'ms',
+        origin=pd.Timestamp(date)
+        )
+    return df
 
     
