@@ -3,6 +3,9 @@ import gzip
 import struct
 from matplotlib import pyplot as plt
 import MyDirectories
+import os
+
+
 from TAQTradesReader import TAQTradesReader
 from TAQQuotesReader import TAQQuotesReader
 from FileManager import FileManager
@@ -44,36 +47,84 @@ def writeToBinTrades(filename,header,data):
         d = struct.pack( ( ">%df" % header[ 1 ]), *data[2] )
         f.write(d)
 
+def plot_ba_price( dataB, dataA, title, filename=None):
+    fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
+    fig.suptitle(title)
+    plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getPrice,"Price Before")
+    ax1.legend()
+    plot_data(ax2,dataA.getN(),dataA.getMillisFromMidn, dataA.getPrice,"Price After")
+    ax2.legend()
+    if filename : fig.savefig(filename)
 
-def plotTrades(dataO, dataM, tickers, title, filename=None):
-    ts = []
-    prices1 = []
-    prices2 = []
-    size1 = []
-    size2 = []
+def plot_ba_bidp( dataB, dataA, title, filename=None):
+    fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
+    fig.suptitle(title)
+    plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getBidPrice,"Price Before")
+    ax1.legend()
+    plot_data(ax2,dataA.getN(),dataA.getMillisFromMidn, dataA.getBidPrice,"Price After")
+    ax2.legend()
+    if filename : fig.savefig(filename)
 
-    if(dataO.getN() != dataM.getN()):
-       raise("Data sizes are different.")
+def plot_ba_askp( dataB, dataA, title, filename=None):
+    fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
+    fig.suptitle(title)
+    plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getAskPrice,"Price Before")
+    ax1.legend()
+    plot_data(ax2,dataA.getN(),dataA.getMillisFromMidn, dataA.getAskPrice,"Price After")
+    ax2.legend()
+    if filename : fig.savefig(filename)
 
-    for index in range(dataO.getN()):
-        ts.append(dataO.getMillisFromMidn(index))
-        prices1.append(dataO.getPrice(index))
-        prices2.append(dataM.getPrice(index))
-        size1.append(dataO.getSize(index))
-        size2.append(dataM.getSize(index))
+def plot_data(ax,N,data_x,data_y,label):
+    x = []
+    y = []
+    for index in range(N):
+        x.append(data_x(index))
+        y.append(data_y(index))
+    ax.plot(x,y,label = label)
 
-    fig, (ax1,ax2) = plt.subplot(2)
-    ax1.plot(ts, prices1)
-    ax1.plot(ts, prices2)
-    ax1.set_title("Prices : " + title)
-    ax1.legend(tickers)
-    ax2.plot(ts, size1)
-    ax2.plot(ts, size2)
-    ax2.set_title("Shares : " + title)
-    ax2.legend(tickers)
-    plt.show()
-    if filename: fig.savefig(filename)
 
+def plot_ba_trade(dataB,dataA,title,filename=None):
+    fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
+    fig.suptitle(title)
+    plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getPrice,"Price Before")
+    plot_data(ax1,dataA.getN(),dataA.getMillisFromMidn, dataA.getPrice,"Price After")
+    ax1.legend()
+    plot_data(ax2,dataB.getN(),dataB.getMillisFromMidn, dataB.getSize,"Size Before")
+    plot_data(ax2,dataA.getN(),dataA.getMillisFromMidn, dataA.getSize,"Size After")
+    ax2.legend()
+    if filename : fig.savefig(filename)
+
+
+def plot_ba_bid(dataB,dataA,title,filename=None):
+    fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
+    fig.suptitle(title)
+    plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getBidPrice,"Price Before")
+    plot_data(ax1,dataA.getN(),dataA.getMillisFromMidn, dataA.getBidPrice,"Price After")
+    ax1.legend()
+    plot_data(ax2,dataB.getN(),dataB.getMillisFromMidn, dataB.getBidSize,"Size Before")
+    plot_data(ax2,dataA.getN(),dataA.getMillisFromMidn, dataA.getBidSize,"Size After")
+    ax2.legend()
+    if filename : fig.savefig(filename)
+
+def plot_ba_ask(dataB,dataA,title,filename=None):
+    fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
+    fig.suptitle(title)
+    plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getAskPrice,"Price Before")
+    plot_data(ax1,dataA.getN(),dataA.getMillisFromMidn, dataA.getAskPrice,"Price After")
+    ax1.legend()
+    plot_data(ax2,dataB.getN(),dataB.getMillisFromMidn, dataB.getAskSize,"Size Before")
+    plot_data(ax2,dataA.getN(),dataA.getMillisFromMidn, dataA.getAskSize,"Size After")
+    ax2.legend()
+    if filename : fig.savefig(filename)
+
+def mkDir(folderName):
+    if not os.path.isdir(folderName):
+       os.makedirs(folderName)
+
+snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
+snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
+snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
+default_dates = ["20070620", "20070921"]
 
 
 def binToFrame(date,ticker,trade = True):
@@ -144,4 +195,3 @@ def cal_return(df,freq='5T',return_type = 'change'):
             lambda x: x[-1]/x[0]-1 if len(x)>0 else None
             ).dropna()
 
-    
