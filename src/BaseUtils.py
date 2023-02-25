@@ -121,10 +121,10 @@ def mkDir(folderName):
     if not os.path.isdir(folderName):
        os.makedirs(folderName)
 
-snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
-snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
-snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
-default_dates = ["20070620", "20070921"]
+# snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
+# snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
+# snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
+# default_dates = ["20070620", "20070921"]
 
 
 def binToFrame(date,ticker,trade = True):
@@ -134,11 +134,12 @@ def binToFrame(date,ticker,trade = True):
     date : list
     '''
 
-    baseDir = MyDirectories.getTAQDir()
-    fm = FileManager(baseDir)
+    
     df_full = pd.DataFrame()
     for d in date:
         if trade:
+            baseDir = MyDirectories.getAdjDir()
+            fm = FileManager(baseDir)
             reader = fm.getTradesFile(d,ticker)
             
             data_dict = {
@@ -149,6 +150,8 @@ def binToFrame(date,ticker,trade = True):
             }
 
         else:
+            baseDir = MyDirectories.getAdjDir()
+            fm = FileManager(baseDir)
             reader = fm.getQuotesFile(d,ticker)
 
             data_dict = {
@@ -176,7 +179,8 @@ def weighted_average_price(df,time_col = 'time',price_col = 'price',size_col = '
         lambda x: np.average(x[price_col], weights = x[size_col])
         )
 
-def cal_return(df,freq='5T',return_type = 'change'):
+def cal_return(df,freq='5T',return_type = 'change',
+                startdate = '20070919',enddate = '20070920'):
     '''
     This function calculate the return (pure change or pct change)
     df : processed df from weighted_average_price(); index are datetime; 
@@ -186,12 +190,13 @@ def cal_return(df,freq='5T',return_type = 'change'):
 
     return : a series of change; index time
     '''
+    drop_index = pd.date_range(startdate+'160000',enddate+'093059',freq=freq)
     if return_type == 'change':
         return df.resample(freq).apply(
             lambda x: x[-1]-x[0] if len(x)>0 else None
-            ).dropna()
+            ).drop(drop_index)
     if return_type == 'pct_change':
         return df.resample(freq).apply(
             lambda x: x[-1]/x[0]-1 if len(x)>0 else None
-            ).dropna()
+            ).drop(drop_index)
 
