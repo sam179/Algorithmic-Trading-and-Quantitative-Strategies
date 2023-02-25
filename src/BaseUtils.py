@@ -6,6 +6,7 @@ import MyDirectories
 from TAQTradesReader import TAQTradesReader
 from TAQQuotesReader import TAQQuotesReader
 from FileManager import FileManager
+import numpy as np
 
 startDate = "20070919"
 endDate = "20070921"
@@ -75,38 +76,72 @@ def plotTrades(dataO, dataM, tickers, title, filename=None):
 
 
 
-def binToFrame(date,ticker,trade = 'True'):
+def binToFrame(date,ticker,trade = True):
 
-    '''Read data from bin to a dataframe'''
-    
+    '''
+    Read data from bin to a dataframe
+    date : list
+    '''
+
     baseDir = MyDirectories.getTAQDir()
     fm = FileManager(baseDir)
-    if trade:
-        reader = fm.getTradesFile(date,ticker)
-        
-        data_dict = {
+    df_full = pd.DataFrame()
+    for d in date:
+        if trade:
+            reader = fm.getTradesFile(d,ticker)
+            
+            data_dict = {
 
-            'time':pd.to_numeric(reader._ts),
-            'price':pd.to_numeric(reader._p),
-            'size':pd.to_numeric(reader._s)
-        }
+                'time':pd.to_numeric(reader._ts),
+                'price':pd.to_numeric(reader._p),
+                'size':pd.to_numeric(reader._s)
+            }
 
-    else:
-        reader = fm.getQuotesFile(date,ticker)
+        else:
+            reader = fm.getQuotesFile(d,ticker)
 
-        data_dict = {
-            'time':pd.to_numeric(reader._ts),
-            'askPrice':pd.to_numeric(reader._ap),
-            'askSize':pd.to_numeric(reader._as),
-            'bidPrice':pd.to_numeric(reader._bp),
-            'bidSize':pd.to_numeric(reader._bs)
-        }
-    df = pd.DataFrame(data_dict)
-    df['time'] = pd.to_datetime(
-        df['time'],
-        unit = 'ms',
-        origin=pd.Timestamp(date)
+            data_dict = {
+                'time':pd.to_numeric(reader._ts),
+                'askPrice':pd.to_numeric(reader._ap),
+                'askSize':pd.to_numeric(reader._as),
+                'bidPrice':pd.to_numeric(reader._bp),
+                'bidSize':pd.to_numeric(reader._bs)
+            }
+        df = pd.DataFrame(data_dict)
+        df['time'] = pd.to_datetime(
+            df['time'],
+            unit = 'ms',
+            origin=pd.Timestamp(d)
+            )
+        if len(df_full)==0:
+            df_full = df
+        else:
+            df_full = df_full.append(df)
+    return df_full
+
+
+def weighted_average_price(df,time_col = 'time',price_col = 'price',size_col = 'size'):
+    return df.groupby(time_col).apply(
+        lambda x: np.average(x[price_col], weights = x[size_col])
         )
-    return df
+
+def cal_return(df,freq='5T',return_type = 'change'):
+    '''
+    This function calculate the return (pure change or pct change)
+    df : processed df from weighted_average_price(); index are datetime; 
+        single column represents price
+    freq : the frequency to calculate return; default 5T
+    return_type : can be 'change' or 'pct_change'
+
+    return : a series of change; index time
+    '''
+    if return_type == 'change':
+        return df.resample(freq).apply(
+            lambda x: x[-1]-x[0] if len(x)>0 else None
+            ).dropna()
+    if return_type == 'pct_change':
+        return df.resample(freq).apply(
+            lambda x: x[-1]/x[0]-1 if len(x)>0 else None
+            ).dropna()
 
     
