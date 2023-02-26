@@ -1,1 +1,2 @@
-IBM, 1, 1T
+IBM, 1, 30S
+MSFT, 1, 20S
