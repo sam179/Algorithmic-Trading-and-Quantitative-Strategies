@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 import MyDirectories
 import os
 
-
 from TAQTradesReader import TAQTradesReader
 from TAQQuotesReader import TAQQuotesReader
 from FileManager import FileManager
@@ -121,10 +120,10 @@ def mkDir(folderName):
     if not os.path.isdir(folderName):
        os.makedirs(folderName)
 
-# snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
-# snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
-# snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
-# default_dates = ["20070620", "20070921"]
+snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
+snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
+snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
+default_dates = ["20070620", "20070921"]
 
 
 def binToFrame(date,ticker,trade = True):

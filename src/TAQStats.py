@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 import scipy.stats as scp
-from taq import MyDirectories
-from taq.FileManager import FileManager
-from taq.TAQQuotesReader import TAQQuotesReader
-from taq.TAQTradesReader import TAQTradesReader
+import MyDirectories
+from FileManager import FileManager
+from TAQQuotesReader import TAQQuotesReader
+from TAQTradesReader import TAQTradesReader
 from pathlib import Path
 
 start_date = "20070620"
