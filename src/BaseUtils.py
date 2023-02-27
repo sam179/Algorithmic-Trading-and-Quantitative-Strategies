@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 import MyDirectories
 import os
 
-
 from TAQTradesReader import TAQTradesReader
 from TAQQuotesReader import TAQQuotesReader
 from FileManager import FileManager
