@@ -121,13 +121,13 @@ def mkDir(folderName):
     if not os.path.isdir(folderName):
        os.makedirs(folderName)
 
-snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
+snp = readExcel(MyDirectories.getTAQDir() / "s&p500.xlsx")
 snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
 snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
 default_dates = ["20070620", "20070921"]
 
 
-def binToFrame(date,ticker,trade = True):
+def binToFrame(date,ticker,trade = True,baseDir = MyDirectories.getAdjDir()):
 
     '''
     Read data from bin to a dataframe
@@ -138,29 +138,37 @@ def binToFrame(date,ticker,trade = True):
     df_full = pd.DataFrame()
     for d in date:
         if trade:
-            baseDir = MyDirectories.getAdjDir()
+            baseDir = baseDir
             fm = FileManager(baseDir)
-            reader = fm.getTradesFile(d,ticker)
-            
-            data_dict = {
+            try:
+                reader = fm.getTradesFile(d,ticker)
+                data_dict = {
 
                 'time':pd.to_numeric(reader._ts),
                 'price':pd.to_numeric(reader._p),
                 'size':pd.to_numeric(reader._s)
             }
 
+            except Exception as e:
+                print(e)
+                continue
+            
+           
         else:
             baseDir = MyDirectories.getAdjDir()
             fm = FileManager(baseDir)
-            reader = fm.getQuotesFile(d,ticker)
+            try:
+                reader = fm.getQuotesFile(d,ticker)
 
-            data_dict = {
-                'time':pd.to_numeric(reader._ts),
-                'askPrice':pd.to_numeric(reader._ap),
-                'askSize':pd.to_numeric(reader._as),
-                'bidPrice':pd.to_numeric(reader._bp),
-                'bidSize':pd.to_numeric(reader._bs)
-            }
+                data_dict = {
+                    'time':pd.to_numeric(reader._ts),
+                    'askPrice':pd.to_numeric(reader._ap),
+                    'askSize':pd.to_numeric(reader._as),
+                    'bidPrice':pd.to_numeric(reader._bp),
+                    'bidSize':pd.to_numeric(reader._bs)
+                }
+            except Exception as e:
+                print(e)
         df = pd.DataFrame(data_dict)
         df['time'] = pd.to_datetime(
             df['time'],
@@ -179,8 +187,8 @@ def weighted_average_price(df,time_col = 'time',price_col = 'price',size_col = '
         lambda x: np.average(x[price_col], weights = x[size_col])
         )
 
-def cal_return(df,freq='5T',return_type = 'change',
-                startdate = '20070919',enddate = '20070920'):
+def cal_return(df,freq='5T',return_type = 'change'):
+                #startdate = '20070919',enddate = '20070920'):
     '''
     This function calculate the return (pure change or pct change)
     df : processed df from weighted_average_price(); index are datetime; 
@@ -190,13 +198,13 @@ def cal_return(df,freq='5T',return_type = 'change',
 
     return : a series of change; index time
     '''
-    drop_index = pd.date_range(startdate+'160000',enddate+'093059',freq=freq)
+    #drop_index = pd.date_range(startdate+'160000',enddate+'093059',freq=freq)
     if return_type == 'change':
         return df.resample(freq).apply(
             lambda x: x[-1]-x[0] if len(x)>0 else None
-            ).drop(drop_index)
+            ).dropna()
     if return_type == 'pct_change':
         return df.resample(freq).apply(
             lambda x: x[-1]/x[0]-1 if len(x)>0 else None
-            ).drop(drop_index)
+            ).dropna()
 

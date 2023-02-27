@@ -7,7 +7,7 @@ import statsmodels.api as sm
 class TAQAutocorrelation():
 
     def __init__(self,date,ticker):
-        self.data = bu.binToFrame(date,ticker) # bin_to_frame to be written later
+        self.data = bu.binToFrame(date,ticker,baseDir=MyDirectories.getCleanDir()) # bin_to_frame to be written later
         self.data = bu.weighted_average_price(self.data)
 
 
@@ -25,11 +25,11 @@ class TAQAutocorrelation():
     
         
 class AutoCorrAll():
-    BASE_DIR = MyDirectories.getAdjDir()
+    BASE_DIR = MyDirectories.getCleanDir()
     fm = FileManager(BASE_DIR)
 
     def __init__(self,tickers,startdate,enddate,
-        freq_list = ['20S','30S','1T','3T','5T','10T','20T'],lags=1):
+        freq_list = ['10S','20S','30S','1T','3T','5T','10T','20T'],lags=1):
         self.tickers = tickers
         self.date = self.fm.getTradeDates(startdate,enddate)
         self.freq_list = freq_list
@@ -39,16 +39,18 @@ class AutoCorrAll():
         for ticker in self.tickers:
             try:
                 autoCorr = TAQAutocorrelation(self.date,ticker)
+                optimal_f,optimal_l = autoCorr.autocorrelation(freq = self.freq_list,lags=self.lags)
+                if record:
+                    with open(record_file,mode = 'a') as f:
+                        f.write(f'{ticker}, {optimal_l}, {optimal_f}')
+                        f.write('\n')
+                        f.close()
+                print(f'{ticker}, {optimal_l}, {optimal_f}')
+                    
             except Exception as e:
                 print(e)
             #for lag in self.lag_list:
-            optimal_f,optimal_l = autoCorr.autocorrelation(freq = self.freq_list,lags=self.lags)
-            if record:
-                with open(record_file,mode = 'a') as f:
-                    f.write(f'{ticker}, {optimal_l}, {optimal_f}')
-                    f.write('\n')
-                    f.close()
-            print(f'{ticker}, {optimal_l}, {optimal_f}')
+            
                 
 
 
