@@ -18,6 +18,14 @@ class MyDirectories(object):
     BinRQQuotesAdjDir = DATA_PATH_ADJ / "quotes"
     BinRTTradesClDir = DATA_PATH_CLEAN / "trades"
     BinRQQuotesClDir = DATA_PATH_CLEAN / "quotes"
+    TEST_PLOT = cwd / "test_plot"
+    RESULT_PLOT = cwd / "test_plot"
+
+def getTestPlotDir():
+    return MyDirectories.TEST_PLOT
+
+def getResultPlotDir():
+    return MyDirectories.RESULT_PLOT
 
 def getAdjDir():
     return MyDirectories.DATA_PATH_ADJ
