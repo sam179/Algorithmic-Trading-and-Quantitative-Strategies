@@ -353,7 +353,7 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
         spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
 
-    columns = ["Ticker", "Date", "Length(days)", "Total Trades", "Total Quotes", "Mean Returns(Trades)",
+    columns = ["Ticker", "Total Trades", "Total Quotes", "Mean Returns(Trades)",
                "Mean Returns(Quotes)", "Trade Quote Ratio", "Median Returns(Trades)", "Median Returns(Quote)",
                "Standard Deviation(Trades)", "Standard Deviation(Quotes)", "Mean Absolute Deviation(Trades)",
                "Mean Absolute Deviation(Quotes)", "Skew(Trades)", "Skew(Quotes)", "Kurtosis(Trades)",
