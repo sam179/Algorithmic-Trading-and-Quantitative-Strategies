@@ -68,7 +68,7 @@ class FileManager(object):
 
     def getTradeTickers(self, dateString):
         tickers = filter(
-            lambda file: file.endswith("_trades.binRT"),
+            lambda file: file.endswith("_trades.binRT") or file.endswith("_trades.BinRT"),
             os.listdir(self._baseDir / "trades" / dateString)
         )
         tickers = map(lambda ticker: ticker[:-13], tickers)
@@ -76,7 +76,7 @@ class FileManager(object):
 
     def getQuoteTickers(self, dateString):
         tickers = filter(
-            lambda file: file.endswith("_quotes.binRQ"),
+            lambda file: file.endswith("_quotes.binRQ") or file.endswith("_quotes.BinRT"),
             os.listdir(self._baseDir / "quotes" / dateString)
         )
         tickers = map(lambda ticker: ticker[:-13], tickers)

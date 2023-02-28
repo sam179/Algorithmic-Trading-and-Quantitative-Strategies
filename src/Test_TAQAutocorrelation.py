@@ -5,19 +5,20 @@ import os
 
 class Test_TAQAutocorrelation(unittest.TestCase):
     
-    # def test_autocorrelation(self):
-    #     cor_obj = TAQAutocorrelation(['20070919','20070920'],'IBM')
-    #     optimal_f = cor_obj.autocorrelation(['20S','30S','1T','3T','5T','10T','20T'],lags=1)
+    def test_autocorrelation(self):
+        cor_obj = TAQAutocorrelation(['20070622'],'JBL')
+        f1,l1 = cor_obj.autocorrelation(['10S','20S'],plot=True)
+        f2,l2 = cor_obj.autocorrelation(['3T'],plot=True)
 
-    #     cor_obj2 = TAQAutocorrelation(['20070919','20070920'],'MSFT')
-    #     optimal_f2 = cor_obj2.autocorrelation(['20S','30S','1T','3T','5T','10T','20T'],lags=1)
+       
 
-    #     self.assertEqual(optimal_f,'30S')
+        self.assertEqual(f1,'20S')
+        self.assertEqual(f2,'3T')
 
     def test_get_all_optimal_freq(self):
-        all = AutoCorrAll(['IBM','MSFT'],None,None)
+        all = AutoCorrAll(['JBL','TMO'],'20070621','20070622')
         all.get_all_optimal_freq()
-        self.assertTrue('noCorrFreq.txt' in os.listdir(os.getcwd()))
+        self.assertTrue('noCorrFreq.txt' in os.listdir(os.getcwd()+'/record'))
 
 if __name__ == "__main__":
     unittest.main()
