@@ -5,6 +5,7 @@ import BaseUtils as bu
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 import os
+from pathlib import Path
 
 class TAQAutocorrelation():
     '''
@@ -51,10 +52,10 @@ class TAQAutocorrelation():
         fig,ax = plt.subplots()
         ax.plot(self.return_freq)
         ax.set_title(title)
-        #plt.show()
+        
         if filename: 
-            filepath = os.getcwd()+'/test_plot/'
-            fig.savefig(filepath+filename)
+            filepath = MyDirectories.getTestPlotDir()
+            fig.savefig(filepath/filename)
 
 
 
@@ -89,9 +90,9 @@ class AutoCorrAll():
                 optimal_f,optimal_l = autoCorr.autocorrelation(freq = self.freq_list,lags=self.lags)
                 # write results to a text file
                 if record:
-                    path = os.getcwd()+'/record/'+record_file
+                    path = MyDirectories.getRecordDir()
                     
-                    with open(path,mode = 'a') as f:
+                    with open(path/record_file,mode = 'a') as f:
                         f.write(f'{ticker}, {optimal_l}, {optimal_f}')
                         f.write('\n')
                         f.close()
