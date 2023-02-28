@@ -116,11 +116,11 @@ class TAQCleanQuotes():
                 data.loc[N - self._k // 2 : ,"stdask"] = data["stdask"].iloc[N-self._k//2 - 1]
                 data.loc[: self._k // 2 ,"stdbid"] = data["stdbid"].iloc[self._k//2]
                 data.loc[: self._k // 2 ,"stdask"] = data["stdask"].iloc[self._k//2]
-
                 # filtering out outliers
                 data = data[ ((abs(data["bidPrice"] - data["meanbid"]) < 2*data["stdbid"] + self._tau*data["meanbid"]) & \
                               (abs(data["askPrice"] - data["meanask"]) < 2*data["stdask"] + self._tau*data["meanask"]))]
- 
+
+                if len(data) < 10 : print(data)
                 # write updated records to clean data directory
                 BaseUtils.mkDir(MyDirectories.getQuotesClDir() / date)
                 BaseUtils.writeToBinQuotes(MyDirectories.getQuotesClDir() / date / (ticker + '_quotes.binRQ'), \
