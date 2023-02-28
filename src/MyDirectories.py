@@ -20,6 +20,7 @@ class MyDirectories(object):
     BinRQQuotesClDir = DATA_PATH_CLEAN / "quotes"
     TEST_PLOT = cwd / "test_plot"
     RESULT_PLOT = cwd / "test_plot"
+    RECORD = cwd/"record"
 
 def getTestPlotDir():
     return MyDirectories.TEST_PLOT
@@ -56,3 +57,6 @@ def getTradesClDir():
 
 def getQuotesClDir():
     return MyDirectories.BinRQQuotesClDir
+
+def getRecordDir():
+    return MyDirectories.RECORD
