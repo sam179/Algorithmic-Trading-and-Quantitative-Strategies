@@ -20,10 +20,10 @@ class TAQCleanTrades():
     def cleanAllTrades(self, dates = None, tickers = None):
         
         if not dates : dates = BaseUtils.default_dates
-        if not tickers : tickers = BaseUtils.snp_tickers
+        if not tickers : tickers = list(BaseUtils.snp_tickers)
         
         # get dates
-        Dates = self._fm.getTradeDates(dates[0], dates[1])
+        Dates = self._fm.getTradeDates(list(dates)[0], list(dates)[1])
         for ticker in tickers:
             
             for date in Dates:
@@ -48,6 +48,8 @@ class TAQCleanTrades():
                 data["std"] = data["Price"].rolling(self._k,center=True).std()
 
                 # fixing beginning and end values
+                if len(data)<self:
+                    continue
                 data.loc[N - self._k // 2  : , "mean"] = data["mean"].iloc[N-self._k//2 - 1]
                 data.loc[ : self._k // 2 , "mean" ] = data["mean"].iloc[self._k//2]
                 data.loc[N - self._k // 2 : , "std"] = data["std"].iloc[N - self._k//2 - 1]
