@@ -48,7 +48,7 @@ class TAQCleanTrades():
                 data["std"] = data["Price"].rolling(self._k,center=True).std()
 
                 # fixing beginning and end values
-                if len(data)<self:
+                if len(data)<self._k:
                     continue
                 data.loc[N - self._k // 2  : , "mean"] = data["mean"].iloc[N-self._k//2 - 1]
                 data.loc[ : self._k // 2 , "mean" ] = data["mean"].iloc[self._k//2]
