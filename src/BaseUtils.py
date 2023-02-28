@@ -10,10 +10,15 @@ from TAQQuotesReader import TAQQuotesReader
 from FileManager import FileManager
 import numpy as np
 
+# default dates
 startDate = "20070919"
 endDate = "20070921"
 
 def readExcel(filename, index = None):
+    '''
+    read excel file or csv to dataframe
+    filename : [String]the path of file 
+    '''
     if ".csv" == filename.suffix:
         return pd.read_csv(filename, index_col = index)
     else:
@@ -21,6 +26,12 @@ def readExcel(filename, index = None):
     
 
 def writeToBinQuotes(filename,header,data):
+    '''
+    write quote data to binary 
+    filename : [String] file name the data should write into
+    header : [list] header corresponding to seconds from epoch and number of records
+    data : [list] data to write to binary files
+    '''
     with gzip.open(filename, "wb") as f:
         d = struct.pack('>2i',*header)
         f.write(d)
@@ -36,6 +47,12 @@ def writeToBinQuotes(filename,header,data):
         f.write(d)
             
 def writeToBinTrades(filename,header,data):
+    '''
+    write trade data to binary 
+    filename : [String] file name the data should write into
+    header : [list] header corresponding to seconds from epoch and number of records
+    data : [list] data to write to binary files
+    '''
     with gzip.open(filename, "wb") as f:
         d = struct.pack('>2i',*header)
         f.write(d)
@@ -47,6 +64,13 @@ def writeToBinTrades(filename,header,data):
         f.write(d)
 
 def plot_ba_price( dataB, dataA, title, filename=None):
+    '''
+    Making before-after price comparison
+    dataB : [Binreader] before data
+    dataA : [Binreader] after data
+    title : [String] title of the graph
+    filename : [String] the name of the graph
+    '''
     fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
     fig.suptitle(title)
     plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getPrice,"Price Before")
@@ -56,6 +80,13 @@ def plot_ba_price( dataB, dataA, title, filename=None):
     if filename : fig.savefig(filename)
 
 def plot_ba_bidp( dataB, dataA, title, filename=None):
+    '''
+    Making before-after bid price comparison
+    dataB : [Binreader] before data
+    dataA : [Binreader] after data
+    title : [String] title of the graph
+    filename : [String] the name of the graph
+    '''
     fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
     fig.suptitle(title)
     plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getBidPrice,"Price Before")
@@ -65,6 +96,13 @@ def plot_ba_bidp( dataB, dataA, title, filename=None):
     if filename : fig.savefig(filename)
 
 def plot_ba_askp( dataB, dataA, title, filename=None):
+    '''
+    Making before-after ask price comparison
+    dataB : [Binreader] before data
+    dataA : [Binreader] after data
+    title : [String] title of the graph
+    filename : [String] the name of the graph
+    '''
     fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
     fig.suptitle(title)
     plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getAskPrice,"Price Before")
@@ -74,6 +112,13 @@ def plot_ba_askp( dataB, dataA, title, filename=None):
     if filename : fig.savefig(filename)
 
 def plot_data(ax,N,data_x,data_y,label):
+    '''
+    Function to plot data
+    ax : [matplotlib.axes.Axes] the axes to draw graph
+    N : [int] length of the data
+    data_x, data_y : [Function] a binreader function
+    label : [String] label for lines   
+    '''
     x = []
     y = []
     for index in range(N):
@@ -83,6 +128,13 @@ def plot_data(ax,N,data_x,data_y,label):
 
 
 def plot_ba_trade(dataB,dataA,title,filename=None):
+    '''
+    Making before-after ask trade price and size comparison
+    dataB : [Binreader] before data
+    dataA : [Binreader] after data
+    title : [String] title of the graph
+    filename : [String] the name of the graph
+    '''
     fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
     fig.suptitle(title)
     plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getPrice,"Price Before")
@@ -95,6 +147,13 @@ def plot_ba_trade(dataB,dataA,title,filename=None):
 
 
 def plot_ba_bid(dataB,dataA,title,filename=None):
+    '''
+    Making before-after ask bid price and size comparison
+    dataB : [Binreader] before data
+    dataA : [Binreader] after data
+    title : [String] title of the graph
+    filename : [String] the name of the graph
+    '''
     fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
     fig.suptitle(title)
     plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getBidPrice,"Price Before")
@@ -106,6 +165,13 @@ def plot_ba_bid(dataB,dataA,title,filename=None):
     if filename : fig.savefig(filename)
 
 def plot_ba_ask(dataB,dataA,title,filename=None):
+    '''
+    Making before-after ask ask price and size comparison
+    dataB : [Binreader] before data
+    dataA : [Binreader] after data
+    title : [String] title of the graph
+    filename : [String] the name of the graph
+    '''
     fig, (ax1,ax2) = plt.subplots(2,figsize=(15,10))
     fig.suptitle(title)
     plot_data(ax1,dataB.getN(),dataB.getMillisFromMidn, dataB.getAskPrice,"Price Before")
@@ -120,6 +186,7 @@ def mkDir(folderName):
     if not os.path.isdir(folderName):
        os.makedirs(folderName)
 
+# set some default values to be used throughout the project
 snp = readExcel(MyDirectories.getTAQDir() / "s&p500.xlsx")
 snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
 snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
@@ -130,17 +197,24 @@ def binToFrame(date,ticker,trade = True,baseDir = MyDirectories.getAdjDir()):
 
     '''
     Read data from bin to a dataframe
-    date : list
+    date : [list] a list of date
+    ticker : [String] symbol of the ticker
+    trade : [Boolean] True means it's trade data
+    baseDir : [Path] the base path binary files locate
+
+    return : a dataframe
     '''
 
     
     df_full = pd.DataFrame()
+    # loop over days
     for d in date:
         if trade:
             baseDir = baseDir
             fm = FileManager(baseDir)
             try:
                 reader = fm.getTradesFile(d,ticker)
+                # build dictionary for dataframe
                 data_dict = {
 
                 'time':pd.to_numeric(reader._ts),
@@ -169,6 +243,7 @@ def binToFrame(date,ticker,trade = True,baseDir = MyDirectories.getAdjDir()):
             except Exception as e:
                 print(e)
         df = pd.DataFrame(data_dict)
+        # change millseconds to normal time format
         df['time'] = pd.to_datetime(
             df['time'],
             unit = 'ms',
@@ -182,12 +257,21 @@ def binToFrame(date,ticker,trade = True,baseDir = MyDirectories.getAdjDir()):
 
 
 def weighted_average_price(df,time_col = 'time',price_col = 'price',size_col = 'size'):
+    '''
+    Calculate weighted average price
+    df : [Dataframe]
+    time_col : [String] the name of time column
+    price_col : [String] the name of price column
+    size_col : [String] the name of size column
+
+    return : a series of weighted price; time is the index
+    '''
     return df.groupby(time_col).apply(
         lambda x: np.average(x[price_col], weights = x[size_col])
         )
 
 def cal_return(df,freq='5T',return_type = 'change'):
-                #startdate = '20070919',enddate = '20070920'):
+                
     '''
     This function calculate the return (pure change or pct change)
     df : processed df from weighted_average_price(); index are datetime; 
