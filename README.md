@@ -36,16 +36,17 @@ Throughout the projects, we used plots,csv, and text files to record the results
 
 ## Testing
 ### Command
-To run all unit tests, in terminal. type in following command:
-python -m unittest discover -s <SRC_DIR> -p 'Test_*.py'
-SRC_DIR is the directory where all tests exist. If keeping our current file structure, SRC_DIR would be src.
+To run all unit tests, in terminal. type in following command: \n
+python -m unittest discover -s <SRC_DIR> -p 'Test_*.py' \n
+
+<SRC_DIR> is the directory where all tests exist. If keeping our current file structure, SRC_DIR would be src.
 ### Requirement for files
 Following files should be in corresponding directories to make sure tests can run.
 
 - BinRTTradesDir : '/20070620/NVDA_trades.BinRT'
-- BinRTTradesAdjDir: '/20070919/IBM_trades.BinRT','/20070920/IBM_trades.BinRT',
+- BinRTTradesAdjDir: '/20070919/IBM_trades.BinRT','/20070920/IBM_trades.BinRT', 
                     '20070720/GE_trades.BinRT'
-- BinRTTradesClDir: '/20070621/JBL_trades.BinRT','/20070622/JBL_trades.BinRT',
+- BinRTTradesClDir: '/20070621/JBL_trades.BinRT','/20070622/JBL_trades.BinRT', 
                     '/20070621/TMO_trades.BinRT','/20070622/TMO.BinRT',
                     '20070720/GE_trades.BinRT'
 - BinRQQuotesAdjDir: '20070720/GE_quotes.BinRT','20070721/GE_quotes.BinRT'
