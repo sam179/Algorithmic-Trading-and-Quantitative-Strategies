@@ -2,21 +2,10 @@ from unittest import TestCase
 import unittest
 import pandas as pd
 from TAQCleaner import *
-import numpy as np
-import scipy.stats as scp
-import MyDirectories
-from FileManager import FileManager
-from TAQQuotesReader import TAQQuotesReader
-from TAQTradesReader import TAQTradesReader
-import matplotlib.pyplot as plt
-from pathlib import Path
-import warnings
-import MyDirectories
-from TAQQuotesReader import TAQQuotesReader
-from TAQTradesReader import TAQTradesReader
+
 import TAQStats
 
-class Test_TAQStats(unittest.TestCase):
+class Test_TAQStats(TestCase):
 
     def test_x_minute_stats(self):
 
@@ -24,7 +13,7 @@ class Test_TAQStats(unittest.TestCase):
         X = 10
 
         """
-        Testing the simple case where we are calculating 10-minute returns for 
+        Testing the simple case where we are calculating 10-minute returns for
         a given sample of stocks
         """
         trading_data, quote_data = TAQStats.x_minute_stats(X = X, stocks = stocks)
@@ -33,148 +22,85 @@ class Test_TAQStats(unittest.TestCase):
 
         # Testing the timestamp duration to be less than or equal to X minutes for trades
         trading_timestamp = trading_data["MillisFromMidn"]
-        self.assertLessEqual(trading_timestamp[1] - trading_timestamp[0], X * 60000)
+        self.assertLessEqual(trading_timestamp.iloc[1] - trading_timestamp.iloc[0], X * 60000)
 
         # Testing the timestamp duration to be less than or equal to X minutes for quotes
         quote_timestamp = quote_data["MillisFromMidn"]
-        self.assertLessEqual(quote_timestamp[1] - quote_timestamp[0], X * 60000)
+        self.assertLessEqual(quote_timestamp.iloc[1] - quote_timestamp.iloc[0], X * 60000)
 
         # Checking the size of the stock list returned in both datasets
         self.assertEqual(len(stocks), len(trading_tickers.index))
         self.assertEqual(len(stocks), len(quote_tickers.index))
 
-        stocks = None
-        X = 10
-        """
-            Testing the simple case where we are calculating 10-minute returns for 
-            when no stocks are passed, so we take the full S&P500 list and run
-        """
-        spx_data = pd.read_excel('s&p500.xlsx', sheet_name=['WRDS'])
-        spx_tickers = spx_data['WRDS']['Ticker Symbol']
-        spx_tickers = spx_tickers.unique()
-        stocks = spx_tickers
+        testing_set = trading_data.iloc[1]
 
-        trading_data, quote_data = TAQStats.x_minute_stats(X=X, stocks=stocks)
-        trading_tickers = trading_data["Ticker"].unique()
-        quote_tickers = quote_data["Ticker"].unique()
-
-        # Testing the timestamp duration to be less than or equal to X minutes for trades
-        trading_timestamp = trading_data["MillisFromMidn"]
-        self.assertLessEqual(trading_timestamp[1] - trading_timestamp[0], X * 60000)
-
-        # Testing the timestamp duration to be less than or equal to X minutes for quotes
-        quote_timestamp = quote_data["MillisFromMidn"]
-        self.assertLessEqual(quote_timestamp[1] - quote_timestamp[0], X * 60000)
-
-        # Checking the size of the stock list returned in both datasets
-        self.assertEqual(len(stocks), len(trading_tickers.index))
-        self.assertEqual(len(stocks), len(quote_tickers.index))
-
-
-        stocks = ["SUNW"]
-        X = None
-        """
-            Testing the simple case where we are calculating daily returns
-            for only one stock.
-        """
-        spx_data = pd.read_excel('s&p500.xlsx', sheet_name=['WRDS'])
-        spx_tickers = spx_data['WRDS']['Ticker Symbol']
-        spx_tickers = spx_tickers.unique()
-        stocks = spx_tickers
-
-        trading_data, quote_data = TAQStats.x_minute_stats(X=X, stocks=stocks)
-        trading_tickers = trading_data["Ticker"].unique()
-        quote_tickers = quote_data["Ticker"].unique()
-
-        # Testing the timestamp duration to be less than or equal to X minutes for trades
-        trading_timestamp = trading_data["MillisFromMidn"]
-        self.assertLessEqual(trading_timestamp[0], )
-
-        # Testing the timestamp duration to be less than or equal to X minutes for quotes
-        quote_timestamp = quote_data["MillisFromMidn"]
-        self.assertLessEqual(quote_timestamp[1] - quote_timestamp[0], X * 60000)
-
-        # Checking the size of the stock list returned in both datasets
-        self.assertEqual(len(stocks), len(trading_tickers.index))
-        self.assertEqual(len(stocks), len(quote_tickers.index))
+        self.assertEqual(testing_set[1], "SUNW")
+        self.assertEqual(str(testing_set[2]), "20070621")
+        self.assertEqual(str(testing_set[3]), "0")
+        self.assertEqual(str(testing_set[4]), "34200000")
+        self.assertEqual(str(testing_set[5]), "305535")
+        self.assertEqual(str(testing_set[6]), "5.07")
+        self.assertEqual(str(testing_set[7]), "-0.01362")
 
     def test_stock_stats(self):
         stocks = ["SUNW", "ADP"]
-        X = 10
+        X = 300
 
         """
-        Testing the simple case where we are calculating 10-minute returns for 
+        Testing the simple case where we are calculating 10-minute returns for
         a given sample of stocks
         """
-        trading_data, quote_data = TAQStats.stock_stats(X=X, stocks=stocks)
-        trading_tickers = trading_data["Ticker"].unique()
-        quote_tickers = quote_data["Ticker"].unique()
+        data = TAQStats.stock_stats(X=X, stocks=stocks)
 
-        # Testing the timestamp duration to be less than or equal to X minutes for trades
-        trading_timestamp = trading_data["MillisFromMidn"]
-        self.assertLessEqual(trading_timestamp[1] - trading_timestamp[0], X * 60000)
+        test_data = data.iloc[0]
 
-        # Testing the timestamp duration to be less than or equal to X minutes for quotes
-        quote_timestamp = quote_data["MillisFromMidn"]
-        self.assertLessEqual(quote_timestamp[1] - quote_timestamp[0], X * 60000)
+        self.assertEqual(test_data[1], "SUNW")
+        self.assertEqual(str(test_data[2]), "20070620")
+        self.assertEqual(str(test_data[3]), "1")
+        self.assertEqual(str(test_data[4]), "25645")
+        self.assertEqual(str(test_data[5]), "35006")
+        self.assertEqual(str(test_data[6]), "-1.00863")
+        self.assertEqual(str(test_data[7]), "-0.863352")
+        self.assertEqual(str(test_data[8]), "0.732589")
+        self.assertEqual(str(test_data[9]), "-1.00863")
+        self.assertEqual(str(test_data[10]), "-0.863352")
+        self.assertEqual(str(test_data[11]), "0.70749")
+        self.assertEqual(str(test_data[12]), "0.608328")
+        self.assertEqual(str(test_data[13]), "0.70749")
+        self.assertEqual(str(test_data[14]), "0.608328")
+        self.assertEqual(str(test_data[15]), "0.0")
+        self.assertEqual(str(test_data[16]), "0.0")
+        self.assertEqual(str(test_data[17]), "-2.0")
+        self.assertEqual(str(test_data[18]), "-2.0")
 
-        # Checking the size of the stock list returned in both datasets
-        self.assertEqual(len(stocks), len(trading_tickers.index))
-        self.assertEqual(len(stocks), len(quote_tickers.index))
 
-        stocks = None
-        X = 10
-        """
-            Testing the simple case where we are calculating 10-minute returns for 
-            when no stocks are passed, so we take the full S&P500 list and run
-        """
-        spx_data = pd.read_excel('s&p500.xlsx', sheet_name=['WRDS'])
-        spx_tickers = spx_data['WRDS']['Ticker Symbol']
-        spx_tickers = spx_tickers.unique()
-        stocks = spx_tickers
+    def test_basic_daily_stats(self):
 
-        trading_data, quote_data = TAQStats.stock_stats(X=X, stocks=stocks)
-        trading_tickers = trading_data["Ticker"].unique()
-        quote_tickers = quote_data["Ticker"].unique()
+        TAQStats.basic_daily_stats()
 
-        # Testing the timestamp duration to be less than or equal to X minutes for trades
-        trading_timestamp = trading_data["MillisFromMidn"]
-        self.assertLessEqual(trading_timestamp[1] - trading_timestamp[0], X * 60000)
+        filename = "../Files/basic_daily_stats_Full_20070620_20070921.csv"
+        stats_table = pd.read_csv(filename)
 
-        # Testing the timestamp duration to be less than or equal to X minutes for quotes
-        quote_timestamp = quote_data["MillisFromMidn"]
-        self.assertLessEqual(quote_timestamp[1] - quote_timestamp[0], X * 60000)
+        test_data = stats_table.iloc[0]
 
-        # Checking the size of the stock list returned in both datasets
-        self.assertEqual(len(stocks), len(trading_tickers.index))
-        self.assertEqual(len(stocks), len(quote_tickers.index))
+        self.assertEqual(test_data[1], "SUNW")
+        self.assertEqual(str(test_data[2]), "2304483")
+        self.assertEqual(str(test_data[3]), "4138394")
+        self.assertEqual(str(test_data[4]), "-0.098893")
+        self.assertEqual(str(test_data[5]), "-0.089395")
+        self.assertEqual(str(test_data[6]), "0.556854")
+        self.assertEqual(str(test_data[7]), "0.0")
+        self.assertEqual(str(test_data[8]), "0.0")
+        self.assertEqual(str(test_data[9]), "5.003718")
+        self.assertEqual(str(test_data[10]), "5.094801")
+        self.assertEqual(str(test_data[11]), "2.03112")
+        self.assertEqual(str(test_data[12]), "2.03364")
+        self.assertEqual(str(test_data[13]), "0.788423")
+        self.assertEqual(str(test_data[14]), "0.768249")
+        self.assertEqual(str(test_data[15]), "6.10916")
+        self.assertEqual(str(test_data[16]), "5.920463")
 
-        stocks = ["SUNW"]
-        X = None
-        """
-            Testing the simple case where we are calculating returns for all available ticks
-            for only one stock.
-        """
-        spx_data = pd.read_excel('s&p500.xlsx', sheet_name=['WRDS'])
-        spx_tickers = spx_data['WRDS']['Ticker Symbol']
-        spx_tickers = spx_tickers.unique()
-        stocks = spx_tickers
 
-        trading_data, quote_data = TAQStats.stock_stats(X=X, stocks=stocks)
-        trading_tickers = trading_data["Ticker"].unique()
-        quote_tickers = quote_data["Ticker"].unique()
-
-        # Testing the timestamp duration to be less than or equal to X minutes for trades
-        trading_timestamp = trading_data["MillisFromMidn"]
-        self.assertLessEqual(trading_timestamp[0], )
-
-        # Testing the timestamp duration to be less than or equal to X minutes for quotes
-        quote_timestamp = quote_data["MillisFromMidn"]
-        self.assertLessEqual(quote_timestamp[1] - quote_timestamp[0], X * 60000)
-
-        # Checking the size of the stock list returned in both datasets
-        self.assertEqual(len(stocks), len(trading_tickers.index))
-        self.assertEqual(len(stocks), len(quote_tickers.index))
 
 if __name__ == "__main__":
     unittest.main()
