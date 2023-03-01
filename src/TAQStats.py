@@ -14,7 +14,7 @@ import openpyxl
 warnings.simplefilter('ignore')
 
 start_date = "20070620"
-end_date = "20070921"
+end_date = "20070624"
 time_increment = 60000
 
 """
@@ -37,8 +37,8 @@ day. This data is stored in relevant files.
 def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_string=end_date, clean_data=0):
     baseDir = MyDirectories.getTAQDir()
     fm = FileManager(baseDir)
-    tradefilepath = Path('tradeReturns.csv')
-    quotefilepath = Path('quoteReturns.csv')
+    tradefilepath = Path('../Files/tradeReturns.csv')
+    quotefilepath = Path('../Files/quoteReturns.csv')
     start_date = start_date_string
     end_date = end_date_string
     trade_dates = sorted(fm.getTradeDates(start_date, end_date))
@@ -195,7 +195,7 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
 
     trade_data, quote_data = x_minute_stats(X, stocks, clean_data=clean_data)
     trade_data = trade_data.fillna(trade_data.mean())
-    quote_data = quote_data.fillna(trade_data.mean())
+    quote_data = quote_data.fillna(quote_data.mean())
     spx_tickers = stocks
 
     if spx_tickers == None:
@@ -317,9 +317,9 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
     stock_data_table = stock_data_table.round(decimals=5)
     # print(stock_data_table)
     if (X == None):
-        filename = "stock_stats_" + str(stocks) + "_" + "Full" + start_date_string + "_" + end_date_string + ".csv"
+        filename = "../Files/stock_stats_" + str(stocks) + "_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
     else:
-        filename = "stock_stats_" + str(stocks) + "_" + str(
+        filename = "../Files/stock_stats_" + str(stocks) + "_" + str(
             X) + "_min_" + start_date_string + "_" + end_date_string + ".csv"
     stock_data_table.to_csv(Path(filename))
     # columns = ["Ticker", "Date", "Length(days)", "Total Trades", "Mean Returns(Trades)"]
@@ -386,7 +386,7 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
         spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
 
-    columns = ["Ticker", "Total Trades", "Total Quotes", "Mean Returns(Trades)",
+    columns = ["Ticker", "Sample Length(days)", "Total Trades", "Total Quotes", "Mean Returns(Trades)",
                "Mean Returns(Quotes)", "Trade Quote Ratio", "Median Returns(Trades)", "Median Returns(Quote)",
                "Standard Deviation(Trades)", "Standard Deviation(Quotes)", "Mean Absolute Deviation(Trades)",
                "Mean Absolute Deviation(Quotes)", "Skew(Trades)", "Skew(Quotes)", "Kurtosis(Trades)",
@@ -498,7 +498,7 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
     stock_data_table = stock_data_table.round(decimals=5)
     # print(stock_data_table)
     if (X == 600):
-        filename = "basic_daily_stats_" + "Full" + start_date_string + "_" + end_date_string + ".csv"
+        filename = "../Files/basic_daily_stats_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
     else:
         filename = "stock_stats_" + str(stocks) + "_" + str(
             X) + "_min_" + start_date_string + "_" + end_date_string + ".csv"
@@ -539,19 +539,27 @@ def plot_stats(stock_data_table, tickers, dates):
 
 def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_string=end_date):
     stocks = ['SUNW', 'ADP']
-    # stock_stats(X=X, stocks=stocks)
+    a = stock_stats(X=300, stocks=stocks)
 
-    # basic_daily_stats()
-    quotes_cleaner = TAQCleanQuotes(k=6, tau=0.025)
+    #a, b = x_minute_stats(X = 600, stocks = stocks)
+    #basic_daily_stats()
+    # quotes_cleaner = TAQCleanQuotes(k=100, tau=0.00025)
+    #
+    # quotes_cleaner.cleanAllQuotes(tickers=["SUNW", "ADP"])
+    #
+    # trades_cleaner = TAQCleanTrades(k=100, tau=0.00025)
+    #
+    # trades_cleaner.cleanAllTrades(tickers=["SUNW", "ADP"])
 
-    quotes_cleaner.cleanAllQuotes(tickers=["SUNW", "ADP"])
+    #stock_stats(X = 1/6, stocks=stocks, clean_data=0)
 
-    trades_cleaner = TAQCleanTrades(k=6, tau=0.025)
-
-    trades_cleaner.cleanAllTrades(tickers=["SUNW", "ADP"])
-
-    stock_stats(X = 3, stocks=stocks, clean_data=1)
-
+    # filename = "basic_daily_stats_Full20070620_20070921.csv"
+    # stats_table = pd.read_csv(filename)
+    #
+    # test_data = stats_table.iloc[0]
+    a_1 = a.iloc[0]
+    #print(a_1[1] - a_1[0])
+    print(a_1)
 
 if __name__ == "__main__":
     # x_minute_stats(100)
