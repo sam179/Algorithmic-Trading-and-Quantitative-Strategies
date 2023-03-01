@@ -36,8 +36,8 @@ Throughout the projects, we used plots,csv, and text files to record the results
 
 ## Testing
 ### Command
-To run all unit tests, in terminal. type in following command: \\n
-python -m unittest discover -s <SRC_DIR> -p 'Test_*.py' \\n
+To run all unit tests, in terminal. type in following command: \\
+python -m unittest discover -s <SRC_DIR> -p 'Test_*.py' \\
 
 <SRC_DIR> is the directory where all tests exist. If keeping our current file structure, SRC_DIR would be src.
 ### Requirement for files
