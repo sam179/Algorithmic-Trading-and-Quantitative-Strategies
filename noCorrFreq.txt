@@ -1,6 +1,0 @@
-IBM, 1, 30S
-MSFT, 1, 20S
-
-
-JBL, 1, 20S
-TMO, 1, 20S
