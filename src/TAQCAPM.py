@@ -3,6 +3,11 @@ from cvxopt import matrix
 from cvxopt.blas import dot
 from cvxopt.solvers import qp, options
 import pylab
+import numpy as np
+import BaseUtils
+from datetime import datetime, timedelta
+import MyDirectories
+import pandas as pd
 
 def runExample():
     n = 4
@@ -55,42 +60,43 @@ def runExample():
     pylab.title('Optimal allocations (fig 4.12)')
     pylab.show()
 
-class MVO():
-    def __init__(self, dates, tickers):
+
+class TAQCAPM():
+    def __init__(self, dates = None, filename=None):
+        # Initialize the class with optional arguments for dates and filename
         self._dates = dates
-        self._tickers = tickers
-        self._returns_col = "Return on the S&P 500 Index"
-        self._port_val = {}
+        # Define columns of interest
+        self._cols = [r"Names Date", r"Trading Symbol", r"Price or Bid/Ask Average", r"Shares Outstanding"]
+        if filename:
+            # If a filename is provided, read in the excel file and select only the columns of interest
+            self._snp = BaseUtils.readExcel(filename)[self._cols]
+        else: 
+            # If no filename is provided, read in the default s&p500.csv file and select only the columns of interest
+            self._snp = BaseUtils.readExcel(MyDirectories.getTAQDir() / "s&p500.csv")[self._cols]
 
-    def setWeights(self):
-        for date in self._dates:
-            self._returns = someFunc(date,tickers,X)
-            S = self._returns.cov().to_numpy()
-            n = len(self._returns.columns)
-            G = matrix(0.0, (n,n))
-            G[::n+1] = -1.0
-            h = matrix(0.0, (n,1))
-            q = matrix(0.0, (n,1))
-            b = matrix(0.0, (2,1))
-            b[::2] = self._snp_return.loc[date,self._returns_col]
-            A = matrix(1.0, (2,n))
-            A[::2] = self._returns.mean().to_numpy()
-            self._results[date] = qp(S, q, G, h, A, b)
-
-    def getResults(self, date=None):
-        if date : return self._returns[date]
-        return self._returns
-
-    def portfolioDollar(self):
-        for date in self._dates:
-            prices = getEODPrices(date,tickers)
-            weights = self._results[date]['x']
-            self._port_val[date] = weights@prices
+    def getWeights(self, date):
+        # Calculate weights for a given date
+        # Select rows where "Names Date" equals the given date, and make a copy of the resulting dataframe
+        current = self._snp.loc[self._snp["Names Date"] == float(date)].copy()
+        # Calculate market cap for each row
+        current["Market Cap"] = current[r"Price or Bid/Ask Average"]*current["Shares Outstanding"]
+        # Calculate weight as market cap divided by the sum of all market caps
+        current["weight"] = current["Market Cap"]/(current["Market Cap"].sum())
+        # Return the resulting dataframe
+        return current
 
     def turnOver(self, date1, date2):
-        return 2*(self._port_val[date2] - self._port_val[date1])/\
-                (self._port_val[date2] - self._port_val[date1])
-    
-    def getWeights(self,date):
-        return self._returns[date]['x']
+        # Calculate turnover ratio between two dates
+        # Get weights for the current date
+        current = self.getWeights(date2)
+        # Get weights for the previous date
+        prev = self.getWeights(date1)
+        # Merge the two dataframes on "Trading Symbol" using an outer join and fill any missing values with 0
+        combined = pd.merge(current[["weight","Trading Symbol"]], prev[["weight","Trading Symbol"]], on="Trading Symbol", how='outer', suffixes=('_current', '_prev')).fillna(0)
+        # Calculate turnover as the sum of absolute differences between current and previous weights
+        return (combined["weight_current"] - combined["weight_prev"]).abs().sum()
+
+obj = TAQCAPM()
+print(obj.turnOver("20070620","20070920"))
+
 

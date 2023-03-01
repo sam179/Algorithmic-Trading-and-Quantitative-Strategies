@@ -122,7 +122,6 @@ class TAQCleanQuotes():
                 data = data[ ((abs(data["bidPrice"] - data["meanbid"]) < 2*data["stdbid"] + self._tau*data["meanbid"]) & \
                               (abs(data["askPrice"] - data["meanask"]) < 2*data["stdask"] + self._tau*data["meanask"]))]
 
-                if len(data) < 10 : print(data)
                 # write updated records to clean data directory
                 BaseUtils.mkDir(MyDirectories.getQuotesClDir() / date)
                 BaseUtils.writeToBinQuotes(MyDirectories.getQuotesClDir() / date / (ticker + '_quotes.binRQ'), \

@@ -10,7 +10,7 @@ class Test_FileManager(unittest.TestCase):
     def test(self):
 
         # Instantiate a file manager
-        baseDir = MyDirectories.getTAQDir()
+        baseDir = MyDirectories.getTestDataDir()
         fm = FileManager( baseDir )
 
         # Make sure we can get a full list of trade dates between

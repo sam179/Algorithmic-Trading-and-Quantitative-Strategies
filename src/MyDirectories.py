@@ -21,6 +21,7 @@ class MyDirectories(object):
     TEST_PLOT = cwd / "test_plot"
     RESULT_PLOT = cwd / "test_plot"
     RECORD = cwd/"record"
+    TEST_DATA_DIR = cwd / "data"
 
 def getTestPlotDir():
     return MyDirectories.TEST_PLOT
@@ -45,6 +46,9 @@ def getQuotesDir():
 
 def getTAQDir():
     return MyDirectories.DATA_PATH
+
+def getTestDataDir():
+    return MyDirectories.TEST_DATA_DIR
 
 def getTradesAdjDir():
     return MyDirectories.BinRTTradesAdjDir
