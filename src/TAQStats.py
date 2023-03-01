@@ -14,7 +14,7 @@ import openpyxl
 warnings.simplefilter('ignore')
 
 start_date = "20070620"
-end_date = "20070622"
+end_date = "20070921"
 time_increment = 60000
 
 """
@@ -51,7 +51,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
 
     # Fetching SPX tickers from the file
     if spx_tickers == None:
-        spx_data = BaseUtils.readExcel(MyDirectories.getTAQDir() / 's&p500.csv')
+        spx_data = pd.read_excel('/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
         spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
     # spx_tickers = ['SUNW']
@@ -199,7 +199,7 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
     spx_tickers = stocks
 
     if spx_tickers == None:
-        spx_data = BaseUtils.readExcel(MyDirectories.getTAQDir() / 's&p500.csv')
+        spx_data = pd.read_excel('/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
         spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
 
@@ -382,7 +382,7 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
     spx_tickers = stocks
 
     if spx_tickers == None:
-        spx_data = BaseUtils.readExcel(MyDirectories.getTAQDir() / 's&p500.csv')
+        spx_data = pd.read_excel('/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
         spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
 
@@ -539,17 +539,17 @@ def plot_stats(stock_data_table, tickers, dates):
 
 def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_string=end_date):
     stocks = ['MSFT', 'GE']
-    a = stock_stats(X=600, stocks=stocks)
+    #a = stock_stats(X=3, stocks=stocks)
 
     #a, b = x_minute_stats(X = 600, stocks = stocks)
     #basic_daily_stats()
-    # quotes_cleaner = TAQCleanQuotes(k=100, tau=0.00025)
-    #
-    # quotes_cleaner.cleanAllQuotes(tickers=stocks)
-    #
-    # trades_cleaner = TAQCleanTrades(k=100, tau=0.00025)
-    #
-    # trades_cleaner.cleanAllTrades(tickers=stocks)
+    quotes_cleaner = TAQCleanQuotes(k=100, tau=0.00025)
+
+    quotes_cleaner.cleanAllQuotes(tickers=stocks)
+
+    trades_cleaner = TAQCleanTrades(k=100, tau=0.00025)
+
+    trades_cleaner.cleanAllTrades(tickers=stocks)
 
     #stock_stats(X = 1/6, stocks=stocks, clean_data=0)
 
