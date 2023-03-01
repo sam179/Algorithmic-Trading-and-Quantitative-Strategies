@@ -27,7 +27,7 @@ class Test_TAQAutocorrelation(unittest.TestCase):
         # to check if the record file is created
         self.assertTrue('noCorrFreq.txt' in os.listdir(record_path))
         # to see correct data is written in
-        with open(record_path/'optimalK.txt',mode = 'r+') as f:
+        with open(record_path/'noCorrFreq.txt',mode = 'r+') as f:
             lastLine = str(f.readlines()[-1]).split(',')
             f.close()
         self.assertTrue(lastLine[0],'TMO')
