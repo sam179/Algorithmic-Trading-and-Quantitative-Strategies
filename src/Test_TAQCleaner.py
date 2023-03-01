@@ -86,7 +86,7 @@ class Test_TAQAdjust(unittest.TestCase):
                                filename = MyDirectories.getTestPlotDir()/"test_bid_clean.png")
         BaseUtils.plot_ba_askp(reader_after, reader_before, "Ask cleaning for General Electric",\
                                filename = MyDirectories.getTestPlotDir()/"test_ask_clean.png")
-        # plt.show()
+  
         
 if __name__ == "__main__":
     unittest.main()

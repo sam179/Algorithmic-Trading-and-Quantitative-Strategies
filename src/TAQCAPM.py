@@ -26,6 +26,9 @@ def runExample():
     N = 100
     mus = [ 10**(5.0*t/N-1.0) for t in range(N) ]
     options['show_progress'] = False
+    options['abstol'] = 1e-14
+    options['reltol'] = 1e-12
+    results = [ qp(mu*S, -pbar, G, h, A, b, options=options) for mu in mus ]
     xs = [ qp(mu*S, -pbar, G, h, A, b)['x'] for mu in mus ]
     returns = [ dot(pbar,x) for x in xs ]
     risks = [ sqrt(dot(x, S*x)) for x in xs ]
@@ -58,7 +61,8 @@ def runExample():
     pylab.text(.05,.7,'x3')
     pylab.text(.01,.7,'x4')
     pylab.title('Optimal allocations (fig 4.12)')
-    pylab.show()
+    pylab.savefig(MyDirectories.getResultPlotDir()/ "cvxopt_example.png")
+    return results
 
 
 class TAQCAPM():
@@ -96,7 +100,5 @@ class TAQCAPM():
         # Calculate turnover as the sum of absolute differences between current and previous weights
         return (combined["weight_current"] - combined["weight_prev"]).abs().sum()
 
-obj = TAQCAPM()
-print(obj.turnOver("20070620","20070920"))
 
 

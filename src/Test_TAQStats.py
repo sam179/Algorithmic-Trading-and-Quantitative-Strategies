@@ -101,7 +101,6 @@ class Test_TAQStats(unittest.TestCase):
     def test_stock_stats(self):
         stocks = ["SUNW", "ADP"]
         X = 10
-
         """
         Testing the simple case where we are calculating 10-minute returns for 
         a given sample of stocks

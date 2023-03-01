@@ -94,9 +94,7 @@ class Test_TAQAdjust(unittest.TestCase):
                               filename = MyDirectories.getTestPlotDir()/"test_bid_adjust.png")
         BaseUtils.plot_ba_ask(reader_before, reader_after, "Ask adjustment for NVIDIA",\
                               filename = MyDirectories.getTestPlotDir()/"test_ask_adjust.png")
-
-        # show plot
-        plt.show()
         
+    
 if __name__ == "__main__":
     unittest.main()
