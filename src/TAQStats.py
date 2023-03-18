@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy.stats as scp
+import os
 import MyDirectories
 from TAQCleaner import *
 from FileManager import FileManager
@@ -9,6 +10,7 @@ from TAQTradesReader import TAQTradesReader
 import matplotlib.pyplot as plt
 from pathlib import Path
 import warnings
+from TickTest import TickTest
 import openpyxl
 
 warnings.simplefilter('ignore')
@@ -51,7 +53,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
 
     # Fetching SPX tickers from the file
     if spx_tickers == None:
-        spx_data = pd.read_excel('/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
+        spx_data = pd.read_excel(os.getcwd() + '/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
         spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
     # spx_tickers = ['SUNW']
@@ -79,7 +81,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
             # Default behaviour in case no X is specified
             if X == None:
                 for index in range(N):
-                    #print('Data Entry ' + str(index) + ' of ' + str(N))
+                    # print('Data Entry ' + str(index) + ' of ' + str(N))
                     value = {"Ticker": ticker, "Date": date, "N": index,
                              "MillisFromMidn": trade_reader.getMillisFromMidn(index),
                              "Size": trade_reader.getSize(index), "Price": trade_reader.getPrice(index)}
@@ -95,7 +97,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
                     if trade_reader.getMillisFromMidn(index) > current_time:
                         value = {"Ticker": ticker, "Date": date, "N": index - 1, "MillisFromMidn": current_time,
                                  "Size": trade_reader.getSize(index - 1), "Price": trade_reader.getPrice(index - 1)}
-                        #print(value)
+                        # print(value)
                         current_time = current_time + X * time_increment
                         # trade_data_table = pd.concat( [trade_data_table, value], ignore_index=True)
                         trade_data = trade_data.append(value, ignore_index=True)
@@ -130,7 +132,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
             N = quote_reader.getN()
             if X == None:
                 for index in range(N):
-                    #print('Data Entry ' + str(index) + ' of ' + str(N))
+                    # print('Data Entry ' + str(index) + ' of ' + str(N))
                     value = {"Ticker": ticker, "Date": date, "N": index,
                              "MillisFromMidn": quote_reader.getMillisFromMidn(index),
                              "AskSize": quote_reader.getAskSize(index), "AskPrice": quote_reader.getAskPrice(index),
@@ -155,7 +157,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
                                  "BidPrice": quote_reader.getBidPrice(index - 1),
                                  "MidQuote": (quote_reader.getAskPrice(index - 1) + quote_reader.getBidPrice(
                                      index - 1)) / 2}
-                        #print(value)
+                        # print(value)
                         current_time = current_time + X * time_increment
                         # trade_data_table = pd.concat( [trade_data_table, value], ignore_index=True)
                         quote_data = quote_data.append(value, ignore_index=True)
@@ -165,7 +167,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
 
     trade_data_table.to_csv(tradefilepath)
     quote_data_table.to_csv(quotefilepath)
-
+    print(quote_data_table)
     return trade_data_table, quote_data_table
 
 
@@ -243,7 +245,7 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
 
             trade_date_filter = ticker_trade_data[ticker_trade_data["Date"] == date]
             trade_returns = np.array(trade_date_filter["Returns"]) * 252
-            #print(trade_returns)
+            # print(trade_returns)
             trade_returns_mean = trade_returns.mean()
             trade_returns_median = np.median(trade_returns)
             trade_returns_std = trade_returns.std()
@@ -317,7 +319,8 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
     stock_data_table = stock_data_table.round(decimals=5)
     # print(stock_data_table)
     if (X == None):
-        filename = str(MyDirectories.getTAQDir()) + "stock_stats_" + str(stocks) + "_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
+        filename = str(MyDirectories.getTAQDir()) + "stock_stats_" + str(
+            stocks) + "_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
     else:
         filename = str(MyDirectories.getTAQDir()) + "stock_stats_" + str(stocks) + "_" + str(
             X) + "_min_" + start_date_string + "_" + end_date_string + ".csv"
@@ -366,6 +369,8 @@ Parameters to input are:
 ---> end_date_string: end_date 
 ---> clean_data: indicates whether we ran a clean version of the data
 """
+
+
 def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_date_string=end_date, clean_data=0):
     baseDir = MyDirectories.getTAQDir()
     fm = FileManager(baseDir)
@@ -498,7 +503,8 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
     stock_data_table = stock_data_table.round(decimals=5)
     # print(stock_data_table)
     if (X == 600):
-        filename = str(MyDirectories.getTAQDir()) + "basic_daily_stats_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
+        filename = str(
+            MyDirectories.getTAQDir()) + "basic_daily_stats_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
     else:
         filename = str(MyDirectories.getTAQDir()) + "stock_stats_" + str(stocks) + "_" + str(
             X) + "_min_" + start_date_string + "_" + end_date_string + ".csv"
@@ -536,13 +542,169 @@ def plot_stats(stock_data_table, tickers, dates):
         ax.set_xticklabels([])
 
 
+def get_vwap(reader, startTS, endTS):
+    v = 0
+    s = 0
+    counter = 0
+    for i in range(0, reader.getN()):
+        if reader.getMillisFromMidn(i) < startTS:
+            continue
+        if reader.getMillisFromMidn(i) >= endTS:
+            break
+        counter = counter + 1
+        v = v + (reader.getSize(i) * reader.getPrice(i))
+        s = s + reader.getSize(i)
+    if counter == 0:
+        counter = 0
+        vwap = None
+    else:
+        counter = counter
+        vwap = v / s
+
+    return vwap, counter
+
+
+def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
+    baseDir = MyDirectories.getTAQDir()
+    fm = FileManager(baseDir)
+    tradefilepath = str(MyDirectories.getTAQDir()) + "/tradeReturns.csv"
+    quotefilepath = str(MyDirectories.getTAQDir()) + "/quoteReturns.csv"
+    trade_dates = sorted(fm.getTradeDates(start_date, end_date))
+    quote_dates = sorted(fm.getQuoteDates(start_date, end_date))
+    X = 2
+    startTS = 34200000
+    endTS = 57600000
+    endTS_330 = endTS - 1800000
+    # Creating a tables for trading data
+
+    spx_tickers = stocks
+
+    # Fetching SPX tickers from the file
+    if spx_tickers == None:
+        spx_data = pd.read_excel('/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
+        spx_tickers = spx_data['WRDS']['Ticker Symbol']
+        spx_tickers = spx_tickers.unique()
+
+    # We compute various matrices
+    mid_quote_matrix = pd.DataFrame(columns=quote_dates)
+    total_daily_volume_matrix = pd.DataFrame(columns=quote_dates)
+    arrival_price_matrix = pd.DataFrame(columns=quote_dates)
+    imbalance_matrix = pd.DataFrame(columns=quote_dates)
+    vwap_330_matrix = pd.DataFrame(columns=quote_dates)
+    vwap_400_matrix = pd.DataFrame(columns=quote_dates)
+    terminal_price_matrix = pd.DataFrame(columns=quote_dates)
+
+    for ticker in spx_tickers:
+
+        # Generating 2-minute mid-quotes matrix
+        _, quotes = x_minute_stats(X, [ticker], start_date_string=start_date, end_date_string=end_date)
+        quotes_trimmed = quotes[["Ticker", "Date", "MidQuote"]]
+        quotes_grouped = quotes_trimmed.groupby(['Ticker', 'Date']).mean()
+        quotes_pivoted = quotes_grouped.pivot_table("MidQuote", ["Ticker"], "Date")
+        mid_quote_matrix = mid_quote_matrix.append(quotes_pivoted)
+
+        # Generating total daily volume matrix
+        # Daily Volume is Volume Weighted Average Price times the total volume
+        # Generating VWAP 400 and VWAP 330 matrix as well
+        # Generating imbalance matrix
+        tdv_vals = pd.DataFrame(columns=["Ticker", "Date", "Trade Volume"])
+        vwap_400_vals = pd.DataFrame(columns=["Ticker", "Date", "VWAP"])
+        vwap_330_vals = pd.DataFrame(columns=["Ticker", "Date", "VWAP"])
+        imbalance_vals = pd.DataFrame(columns=["Ticker", "Date", "Imbalance"])
+        for date in quote_dates:
+            try:
+                print('Getting Trade data for ' + ticker + ', date: ' + str(date))
+            except:
+                print(ticker)
+                continue
+            try:
+                trade_reader = TAQTradesReader(
+                    str(MyDirectories.getTradesDir()) + '/' + date + '/' + ticker + '_trades.binRT')
+            except:
+                pass
+            N = trade_reader.getN()
+            vwap_400, _ = get_vwap(trade_reader, startTS, endTS)
+            vwap_330, _ = get_vwap(trade_reader, startTS, endTS_330)
+            volume = 0
+
+            for index in range(N):
+                volume += trade_reader.getSize(index)
+
+            volume_value = {"Ticker": ticker, "Date": date, "Trade Volume": volume * vwap_400}
+            tdv_vals = tdv_vals.append(volume_value, ignore_index=True)
+            vwap_val = {"Ticker": ticker, "Date": date, "VWAP": vwap_400}
+            vwap_400_vals = vwap_400_vals.append(vwap_val, ignore_index=True)
+            vwap_val = {"Ticker": ticker, "Date": date, "VWAP": vwap_330}
+            vwap_330_vals = vwap_330_vals.append(vwap_val, ignore_index=True)
+
+            tick_test = TickTest()
+            classifications = tick_test.classifyAll(trade_reader, startTS, endTS_330)
+            imbalance = 0
+            for i in range(0, N):
+                if trade_reader.getMillisFromMidn(i) < startTS:
+                    continue
+                if trade_reader.getMillisFromMidn(i) >= endTS_330:
+                    break
+                imbalance += trade_reader.getSize(i) * classifications[i][2]
+
+            imbalance_val = {"Ticker": ticker, "Date": date, "Imbalance": imbalance * vwap_330}
+            imbalance_vals = imbalance_vals.append(imbalance_val, ignore_index=True)
+        tdv_pivoted = tdv_vals.pivot_table("Trade Volume", ["Ticker"], "Date")
+        total_daily_volume_matrix = total_daily_volume_matrix.append(tdv_pivoted)
+        vwap_400_pivoted = vwap_400_vals.pivot_table("VWAP", ["Ticker"], "Date")
+        vwap_400_matrix = vwap_400_matrix.append(vwap_400_pivoted)
+        vwap_330_pivoted = vwap_330_vals.pivot_table("VWAP", ["Ticker"], "Date")
+        vwap_330_matrix = vwap_330_matrix.append(vwap_330_pivoted)
+        imbalance_pivoted = imbalance_vals.pivot_table("Imbalance", ["Ticker"], "Date")
+        imbalance_matrix = imbalance_matrix.append(imbalance_pivoted)
+
+        # Generating arrival price matrix and terminal price matrix
+        arrival_price = pd.DataFrame(columns=["Ticker", "Date", "Average Price"])
+        terminal_price = pd.DataFrame(columns=["Ticker", "Date", "Average Price"])
+        for date in quote_dates:
+            try:
+                print('Getting Quote data for ' + ticker + ', date: ' + str(date))
+            except:
+                print(ticker)
+                continue
+            try:
+                quote_reader = TAQQuotesReader(
+                    str(MyDirectories.getQuotesDir()) + '/' + date + '/' + ticker + '_quotes.binRQ')
+            except:
+                pass
+
+            N = quote_reader.getN()
+            price = 0
+            for index in range(0, min(N, 5) - 1):
+                price += (quote_reader.getAskPrice(index) + quote_reader.getBidPrice(index)) / 2
+            price_value = {"Ticker": ticker, "Date": date, "Average Price": price / min(N, 5)}
+            arrival_price = arrival_price.append(price_value, ignore_index=True)
+
+            price = 0
+            for index in range(max(N - 5, 0), N - 1):
+                price += (quote_reader.getAskPrice(index) + quote_reader.getBidPrice(index)) / 2
+            price_value = {"Ticker": ticker, "Date": date, "Average Price": price / min(N, 5)}
+            terminal_price = terminal_price.append(price_value, ignore_index=True)
+
+        arrival_price_pivoted = arrival_price.pivot_table("Average Price", ["Ticker"], "Date")
+        arrival_price_matrix = arrival_price_matrix.append(arrival_price_pivoted)
+
+        terminal_price_pivoted = terminal_price.pivot_table("Average Price", ["Ticker"], "Date")
+        terminal_price_matrix = terminal_price_matrix.append(terminal_price_pivoted)
+
+        print(imbalance_matrix)
+    return mid_quote_matrix, total_daily_volume_matrix, arrival_price_matrix, imbalance_matrix, vwap_330_matrix, vwap_400_matrix, terminal_price_matrix
+
+    # for ticker in spx_tickers:
+    #     for date in quote_dates:
+
 
 def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_string=end_date):
     stocks = ['MSFT', 'GE']
-    #a = stock_stats(X=3, stocks=stocks)
+    # a = stock_stats(X=3, stocks=stocks)
 
-    #a, b = x_minute_stats(X = 600, stocks = stocks)
-    #basic_daily_stats()
+    # a, b = x_minute_stats(X = 600, stocks = stocks)
+    # basic_daily_stats()
     quotes_cleaner = TAQCleanQuotes(k=100, tau=0.00025)
 
     quotes_cleaner.cleanAllQuotes(tickers=stocks)
@@ -551,7 +713,7 @@ def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_s
 
     trades_cleaner.cleanAllTrades(tickers=stocks)
 
-    #stock_stats(X = 1/6, stocks=stocks, clean_data=0)
+    # stock_stats(X = 1/6, stocks=stocks, clean_data=0)
 
     # filename = "basic_daily_stats_Full20070620_20070921.csv"
     # stats_table = pd.read_csv(filename)
@@ -560,6 +722,6 @@ def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_s
 
 
 if __name__ == "__main__":
-    # x_minute_stats(100)
+    # x_minute_stats(10, ['MSFT', 'AAPL'], start_date_string = '20070620', end_date_string = '20070622')
     # stock_stats(X=None, stocks=['SUNW', 'ADP'])
-    stock_analysis()
+    impact_model_stats(['MSFT', "AAPL"], start_date='20070620', end_date='20070623')
