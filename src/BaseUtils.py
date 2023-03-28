@@ -189,8 +189,9 @@ def mkDir(folderName):
 # set some default values to be used throughout the project
 snp = readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
 snp["Names Date"] = snp["Names Date"].apply(lambda x: str(x)[:-2])
-snp_tickers = set(snp['Ticker Symbol'].dropna().to_list())
+snp_tickers = list(set(snp['Trading Symbol'].dropna().to_list()))
 default_dates = ["20070620", "20070921"]
+snp_dates = snp['Names Date'].dropna().unique().tolist()[:-1]
 
 
 def binToFrame(date,ticker,trade = True,baseDir = MyDirectories.getAdjDir()):
@@ -281,7 +282,6 @@ def cal_return(df,freq='5T',return_type = 'change'):
 
     return : a series of change; index time
     '''
-    #drop_index = pd.date_range(startdate+'160000',enddate+'093059',freq=freq)
     if return_type == 'change':
         return df.resample(freq).apply(
             lambda x: x[-1]-x[0] if len(x)>0 else None

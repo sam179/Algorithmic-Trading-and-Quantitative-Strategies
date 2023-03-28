@@ -12,6 +12,7 @@ from pathlib import Path
 import warnings
 from TickTest import TickTest
 import openpyxl
+import BaseUtils
 
 warnings.simplefilter('ignore')
 
@@ -56,16 +57,10 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
         spx_data = pd.read_excel(os.getcwd() + '/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
         spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
-    # spx_tickers = ['SUNW']
-    # print(clean_data)
+
     for ticker in spx_tickers:
         trade_data = pd.DataFrame(columns=["Ticker", "Date", "N", "MillisFromMidn", "Size", "Price"])
         for date in trade_dates:
-            try:
-                print('Getting Trade data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
             try:
                 if (not clean_data):
                     trade_reader = TAQTradesReader(
@@ -113,12 +108,6 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
         quote_data = pd.DataFrame(
             columns=["Ticker", "Date", "N", "MillisFromMidn", "AskSize", "AskPrice", "BidSize", "BidPrice", "MidQuote"])
         for date in quote_dates:
-
-            try:
-                print('Getting Quote data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
             try:
                 if not clean_data:
                     quote_reader = TAQQuotesReader(
@@ -167,7 +156,6 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
 
     trade_data_table.to_csv(tradefilepath)
     quote_data_table.to_csv(quotefilepath)
-    print(quote_data_table)
     return trade_data_table, quote_data_table
 
 
@@ -225,11 +213,6 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
 
         for date in trade_dates:
             try:
-                print('Getting Trade data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
-            try:
                 if (not clean_data):
                     trade_reader = TAQTradesReader(
                         str(MyDirectories.getTradesDir()) + '/' + date + '/' + ticker + '_trades.binRT')
@@ -245,7 +228,6 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
 
             trade_date_filter = ticker_trade_data[ticker_trade_data["Date"] == date]
             trade_returns = np.array(trade_date_filter["Returns"]) * 252
-            # print(trade_returns)
             trade_returns_mean = trade_returns.mean()
             trade_returns_median = np.median(trade_returns)
             trade_returns_std = trade_returns.std()
@@ -253,7 +235,6 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
             trade_returns_mad = np.median(trade_mad)
             trade_returns_skew = scp.skew(trade_returns)
             trade_returns_kurtosis = scp.kurtosis(trade_returns)
-            print(trade_returns_median)
             trade_returns_sorted = np.argsort(trade_returns)
             trade_returns_10_largest = trade_returns[trade_returns_sorted[-10:]]
             trade_returns_10_smallest = trade_returns[trade_returns_sorted[: 10]]
@@ -263,11 +244,6 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
             drawdowns = (cum_returns - running_max) / running_max
             max_trade_drawdown = np.min(drawdowns)
 
-            try:
-                print('Getting Quote data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
             try:
                 if not clean_data:
                     quote_reader = TAQQuotesReader(
@@ -317,7 +293,6 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
             stock_data_table = stock_data_table.append(value, ignore_index=True)
 
     stock_data_table = stock_data_table.round(decimals=5)
-    # print(stock_data_table)
     if (X == None):
         filename = str(MyDirectories.getTAQDir()) + "stock_stats_" + str(
             stocks) + "_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
@@ -331,33 +306,6 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
 
     return stock_data_table
 
-
-# def plot_stats(stock_data_table, tickers, dates):
-#
-#     columns = ["Ticker", "Date", "Length(days)", "Total Trades", "Total Quotes", "Mean Returns(Trades)",
-#                "Mean Returns(Quotes)", "Trade Quote Ratio", "Median Returns(Trades)", "Median Returns(Quote)",
-#                "Standard Deviation(Trades)", "Standard Deviation(Quotes)", "Mean Absolute Deviation(Trades)",
-#                "Mean Absolute Deviation(Quotes)", "Skew(Trades)", "Skew(Quotes)", "Kurtosis(Trades)",
-#                "Kurtosis(Quotes)", "10 Largest Returns(Trades)", "10 Largest Returns(Quotes)",
-#                "10 Smallest Returns(Trades)", "10 Smallest Returns(Quotes)", "Maximum Drawdown(Trades)", "Maximum Drawdown(Quotes)"]
-#
-#     for column in columns:
-#
-#         if column in ["Ticker", "Date", "Length(days)", "10 Largest Returns(Trades)", "10 Largest Returns(Quotes)",
-#                       "10 Smallest Returns(Trades)", "10 Smallest Returns(Quotes)"]:
-#             continue
-#
-#         plt.figure(figsize=(14, 6))
-#         plt.title(column + ' with Dates')
-#         plt.xlabel('Dates')
-#         plt.ylabel(column)
-#         plt.grid()
-#         for ticker in tickers:
-#             ticker_data = stock_data_table[stock_data_table["Ticker"] == ticker]
-#             plt.plot(dates, ticker_data[column], label=column + " : " + ticker)
-#         plt.legend(labelspacing=1, title='Stocks', fontsize='large')
-#         plt.show()
-#
 """
 basic_daily_stats function calculates daily statistics of a stock as asked in question 2b
 Returns are calculated based on the changes in daily returns of the stock. 
@@ -455,11 +403,6 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
 
         for date in trade_dates:
             try:
-                print('Getting Trade data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
-            try:
                 trade_reader = TAQTradesReader(
                     str(MyDirectories.getTradesDir()) + '/' + date + '/' + ticker + '_trades.binRT')
             except:
@@ -469,11 +412,6 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
                 length = length + 1
             total_trades = total_trades + N
 
-            try:
-                print('Getting Quote data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
             try:
                 quote_reader = TAQQuotesReader(
                     str(MyDirectories.getQuotesDir()) + '/' + date + '/' + ticker + '_quotes.binRQ')
@@ -501,7 +439,6 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
         stock_data_table = stock_data_table.append(value, ignore_index=True)
 
     stock_data_table = stock_data_table.round(decimals=5)
-    # print(stock_data_table)
     if (X == 600):
         filename = str(
             MyDirectories.getTAQDir()) + "basic_daily_stats_" + "Full_" + start_date_string + "_" + end_date_string + ".csv"
@@ -567,8 +504,8 @@ def get_vwap(reader, startTS, endTS):
 def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
     baseDir = MyDirectories.getTAQDir()
     fm = FileManager(baseDir)
-    tradefilepath = str(MyDirectories.getTAQDir()) + "/tradeReturns.csv"
-    quotefilepath = str(MyDirectories.getTAQDir()) + "/quoteReturns.csv"
+    tradefilepath = MyDirectories.getTAQDir() / "tradeReturns.csv"
+    quotefilepath = MyDirectories.getTAQDir() / "quoteReturns.csv"
     trade_dates = sorted(fm.getTradeDates(start_date, end_date))
     quote_dates = sorted(fm.getQuoteDates(start_date, end_date))
     X = 2
@@ -581,8 +518,8 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
 
     # Fetching SPX tickers from the file
     if spx_tickers == None:
-        spx_data = pd.read_excel('/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
-        spx_tickers = spx_data['WRDS']['Ticker Symbol']
+        spx_data = BaseUtils.readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
+        spx_tickers = spx_data['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
 
     # We compute various matrices
@@ -598,7 +535,7 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
 
         # Generating 2-minute mid-quotes matrix
         _, quotes = x_minute_stats(X, [ticker], start_date_string=start_date, end_date_string=end_date)
-        quotes_trimmed = quotes[["Ticker", "Date", "MidQuote"]]
+        quotes_trimmed = quotes[["Ticker", "Date", "Returns"]]
         quotes_grouped = quotes_trimmed.groupby(['Ticker', 'Date']).mean()
         quotes_pivoted = quotes_grouped.pivot_table("MidQuote", ["Ticker"], "Date")
         mid_quote_matrix = mid_quote_matrix.append(quotes_pivoted)
@@ -613,13 +550,7 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
         imbalance_vals = pd.DataFrame(columns=["Ticker", "Date", "Imbalance"])
         for date in quote_dates:
             try:
-                print('Getting Trade data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
-            try:
-                trade_reader = TAQTradesReader(
-                    str(MyDirectories.getTradesDir()) + '/' + date + '/' + ticker + '_trades.binRT')
+                trade_reader = TAQTradesReader(MyDirectories.getTradesDir()  /  date / (ticker + '_trades.binRT'))
             except:
                 pass
             N = trade_reader.getN()
@@ -663,13 +594,7 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
         terminal_price = pd.DataFrame(columns=["Ticker", "Date", "Average Price"])
         for date in quote_dates:
             try:
-                print('Getting Quote data for ' + ticker + ', date: ' + str(date))
-            except:
-                print(ticker)
-                continue
-            try:
-                quote_reader = TAQQuotesReader(
-                    str(MyDirectories.getQuotesDir()) + '/' + date + '/' + ticker + '_quotes.binRQ')
+                quote_reader = TAQQuotesReader(MyDirectories.getQuotesDir() / date / (ticker + '_quotes.binRQ'))
             except:
                 pass
 
@@ -692,11 +617,8 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
         terminal_price_pivoted = terminal_price.pivot_table("Average Price", ["Ticker"], "Date")
         terminal_price_matrix = terminal_price_matrix.append(terminal_price_pivoted)
 
-        print(imbalance_matrix)
     return mid_quote_matrix, total_daily_volume_matrix, arrival_price_matrix, imbalance_matrix, vwap_330_matrix, vwap_400_matrix, terminal_price_matrix
 
-    # for ticker in spx_tickers:
-    #     for date in quote_dates:
 
 
 def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_string=end_date):
@@ -720,8 +642,3 @@ def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_s
     #
     # test_data = stats_table.iloc[0]
 
-
-if __name__ == "__main__":
-    # x_minute_stats(10, ['MSFT', 'AAPL'], start_date_string = '20070620', end_date_string = '20070622')
-    # stock_stats(X=None, stocks=['SUNW', 'ADP'])
-    impact_model_stats(['MSFT', "AAPL"], start_date='20070620', end_date='20070623')

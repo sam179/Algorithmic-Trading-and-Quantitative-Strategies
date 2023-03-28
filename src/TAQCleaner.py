@@ -20,7 +20,7 @@ class TAQCleanTrades():
     def cleanAllTrades(self, dates = None, tickers = None):
         
         if not dates : dates = BaseUtils.default_dates
-        if not tickers : tickers = list(BaseUtils.snp_tickers)
+        if not tickers : tickers = BaseUtils.snp_tickers
         
         # get dates
         Dates = self._fm.getTradeDates(list(dates)[0], list(dates)[1])

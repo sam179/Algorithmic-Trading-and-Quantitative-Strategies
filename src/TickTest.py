@@ -23,9 +23,9 @@ class TickTest(object):
         classifications = [0] * data.getN()  # That's the most space we might need
         startI = 0
         for i in range(0, data.getN()):
-            if data.getMillisFromMidn(i) < startTimestamp:
+            if data.getTimestamp(i) < startTimestamp:
                 continue
-            if data.getMillisFromMidn(i) >= endTimestamp:
+            if data.getTimestamp(i) >= endTimestamp:
                 break
             classifications[startI] = (data.getTimestamp(i), data.getPrice(i), self.classify(data.getPrice(i)))
             startI = startI + 1
