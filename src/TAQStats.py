@@ -69,7 +69,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
                     trade_reader = TAQTradesReader(
                         str(MyDirectories.getTradesClDir()) + '/' + date + '/' + ticker + '_trades.binRT')
             except:
-                pass
+                continue
 
             N = trade_reader.getN()
 
@@ -116,7 +116,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
                     quote_reader = TAQQuotesReader(
                         str(MyDirectories.getQuotesClDir()) + '/' + date + '/' + ticker + '_quotes.binRQ')
             except:
-                pass
+                continue
 
             N = quote_reader.getN()
             if X == None:
@@ -156,6 +156,8 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
 
     trade_data_table.to_csv(tradefilepath)
     quote_data_table.to_csv(quotefilepath)
+    #print(quote_data_table)
+
     return trade_data_table, quote_data_table
 
 
@@ -220,7 +222,7 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
                     trade_reader = TAQTradesReader(
                         str(MyDirectories.getTradesClDir()) + '/' + date + '/' + ticker + '_trades.binRT')
             except:
-                pass
+                continue
             N = trade_reader.getN()
             if N > 0:
                 length = length + 1
@@ -252,7 +254,7 @@ def stock_stats(X=None, stocks=None, start_date_string=start_date, end_date_stri
                     quote_reader = TAQQuotesReader(
                         str(MyDirectories.getQuotesClDir()) + '/' + date + '/' + ticker + '_quotes.binRQ')
             except:
-                pass
+                continue
             N = quote_reader.getN()
             total_quotes = total_quotes + N
             trade_quote_ratio = total_trades / total_quotes
@@ -406,7 +408,7 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
                 trade_reader = TAQTradesReader(
                     str(MyDirectories.getTradesDir()) + '/' + date + '/' + ticker + '_trades.binRT')
             except:
-                pass
+                continue
             N = trade_reader.getN()
             if N > 0:
                 length = length + 1
@@ -416,7 +418,7 @@ def basic_daily_stats(X=None, stocks=None, start_date_string=start_date, end_dat
                 quote_reader = TAQQuotesReader(
                     str(MyDirectories.getQuotesDir()) + '/' + date + '/' + ticker + '_quotes.binRQ')
             except:
-                pass
+                continue
             N = quote_reader.getN()
             total_quotes = total_quotes + N
             trade_quote_ratio = total_trades / total_quotes
@@ -517,9 +519,9 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
     spx_tickers = stocks
 
     # Fetching SPX tickers from the file
-    if spx_tickers == None:
-        spx_data = BaseUtils.readExcel(MyDirectories.getTAQDir() / "s&p500.csv")
-        spx_tickers = spx_data['Ticker Symbol']
+    if spx_tickers is None:
+        spx_data = pd.read_excel(os.getcwd() + '/data_orig/s&p500.xlsx', sheet_name=['WRDS'])
+        spx_tickers = spx_data['WRDS']['Ticker Symbol']
         spx_tickers = spx_tickers.unique()
 
     # We compute various matrices
@@ -537,7 +539,7 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
         _, quotes = x_minute_stats(X, [ticker], start_date_string=start_date, end_date_string=end_date)
         quotes_trimmed = quotes[["Ticker", "Date", "Returns"]]
         quotes_grouped = quotes_trimmed.groupby(['Ticker', 'Date']).mean()
-        quotes_pivoted = quotes_grouped.pivot_table("MidQuote", ["Ticker"], "Date")
+        quotes_pivoted = quotes_grouped.pivot_table("Returns", ["Ticker"], "Date")
         mid_quote_matrix = mid_quote_matrix.append(quotes_pivoted)
 
         # Generating total daily volume matrix
@@ -552,10 +554,13 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
             try:
                 trade_reader = TAQTradesReader(MyDirectories.getTradesDir()  /  date / (ticker + '_trades.binRT'))
             except:
-                pass
+                continue
             N = trade_reader.getN()
             vwap_400, _ = get_vwap(trade_reader, startTS, endTS)
             vwap_330, _ = get_vwap(trade_reader, startTS, endTS_330)
+
+            if vwap_330 is None:
+                continue
             volume = 0
 
             for index in range(N):
@@ -577,7 +582,6 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
                 if trade_reader.getMillisFromMidn(i) >= endTS_330:
                     break
                 imbalance += trade_reader.getSize(i) * classifications[i][2]
-
             imbalance_val = {"Ticker": ticker, "Date": date, "Imbalance": imbalance * vwap_330}
             imbalance_vals = imbalance_vals.append(imbalance_val, ignore_index=True)
         tdv_pivoted = tdv_vals.pivot_table("Trade Volume", ["Ticker"], "Date")
@@ -596,7 +600,7 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
             try:
                 quote_reader = TAQQuotesReader(MyDirectories.getQuotesDir() / date / (ticker + '_quotes.binRQ'))
             except:
-                pass
+                continue
 
             N = quote_reader.getN()
             price = 0
@@ -616,6 +620,8 @@ def impact_model_stats(stocks=None, start_date=start_date, end_date=end_date):
 
         terminal_price_pivoted = terminal_price.pivot_table("Average Price", ["Ticker"], "Date")
         terminal_price_matrix = terminal_price_matrix.append(terminal_price_pivoted)
+
+    print(mid_quote_matrix)
 
     return mid_quote_matrix, total_daily_volume_matrix, arrival_price_matrix, imbalance_matrix, vwap_330_matrix, vwap_400_matrix, terminal_price_matrix
 
@@ -642,3 +648,7 @@ def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_s
     #
     # test_data = stats_table.iloc[0]
 
+if __name__ == "__main__":
+    # x_minute_stats(10, ['MSFT', 'AAPL'], start_date_string = '20070620', end_date_string = '20070622')
+    # stock_stats(X=None, stocks=['SUNW', 'ADP'])
+    impact_model_stats(start_date='20070620', end_date='20070623')
