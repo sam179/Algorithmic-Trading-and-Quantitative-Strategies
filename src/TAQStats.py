@@ -62,7 +62,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
         trade_data = pd.DataFrame(columns=["Ticker", "Date", "N", "MillisFromMidn", "Size", "Price"])
         for date in trade_dates:
             try:
-                if (not clean_data):
+                if clean_data == 0:
                     trade_reader = TAQTradesReader(
                         str(MyDirectories.getTradesDir()) + '/' + date + '/' + ticker + '_trades.binRT')
                 else:
@@ -73,6 +73,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
 
             N = trade_reader.getN()
 
+            print('Running trade data for ', ticker, ' for date, ', date)
             # Default behaviour in case no X is specified
             if X == None:
                 for index in range(N):
@@ -109,7 +110,7 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
             columns=["Ticker", "Date", "N", "MillisFromMidn", "AskSize", "AskPrice", "BidSize", "BidPrice", "MidQuote"])
         for date in quote_dates:
             try:
-                if not clean_data:
+                if clean_data == 0:
                     quote_reader = TAQQuotesReader(
                         str(MyDirectories.getQuotesDir()) + '/' + date + '/' + ticker + '_quotes.binRQ')
                 else:
@@ -119,6 +120,8 @@ def x_minute_stats(X=None, stocks=None, start_date_string=start_date, end_date_s
                 continue
 
             N = quote_reader.getN()
+
+            print('Running quote data for ', ticker, ' for date, ', date)
             if X == None:
                 for index in range(N):
                     # print('Data Entry ' + str(index) + ' of ' + str(N))
@@ -649,6 +652,6 @@ def stock_analysis(X=None, stocks=None, start_date_string=start_date, end_date_s
     # test_data = stats_table.iloc[0]
 
 if __name__ == "__main__":
-    # x_minute_stats(10, ['MSFT', 'AAPL'], start_date_string = '20070620', end_date_string = '20070622')
+    x_minute_stats(5)
     # stock_stats(X=None, stocks=['SUNW', 'ADP'])
-    impact_model_stats(start_date='20070620', end_date='20070623')
+    #impact_model_stats(start_date='20070620', end_date='20070623')
