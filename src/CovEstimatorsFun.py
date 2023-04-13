@@ -4,8 +4,10 @@ from sklearn.covariance import empirical_covariance
 import pyRMT
 from sklearn.model_selection import TimeSeriesSplit
 import numpy as np
+from TrainTestSplit import TrainTestSplit
+import MyDirectories 
 
-def min_var_weight(cov,test_set,n_stocks = 500,type = 'min_variance'):
+def min_var_weight(cov,test_set,n_stocks = 499,type = 'min_variance'):
     '''
     return weight of min variance portfolio
     cov: estimated covariance matrix
@@ -43,9 +45,34 @@ def cov_cal(data,type = 'empirical'):
     else:
         return pyRMT.optimalShrinkage(data,return_covariance=True)
 
+class CovEstimators():
+
+    def __init__(self,filename,q=0.5):
+        
+        self.splitObj = TrainTestSplit(filename,q)
+        self.splitObj.split()
+        self.sample_n = self.splitObj.get_n()
+        
+
+    def avg_variance(self,cov_type,g_type):
+        vol = []
+        for i in range(self.sample_n):
+            train_data = self.splitObj.get_train_set(i)
+            test_data = self.splitObj.get_test_set(i)
+            cov = cov_cal(train_data,type = cov_type)
+            w = min_var_weight(cov,test_data,type = g_type)
+            vol.append(np.sqrt(w.T@cov@w*252*78))
+        return np.mean(vol),np.std(vol)
+
+
 
 if __name__=="__main__":
-    cov = np.random.rand(500,500)
-    test_set = pd.DataFrame(np.random.rand(600,500))
-    print(cov_cal(test_set,'optimalShrinkage'))
-    print(min_var_weight(cov,test_set,500,type='random'))
+    ce = CovEstimators('normalized_returns.csv')
+    with open(MyDirectories.getRecordDir()/'covEstimatorResult.txt',mode='a') as f:
+        for cov_type in ['empirical','clipped','optimalShrinkage']:
+            for g_type in ["min_variance","omniscient","random"]:
+                avg_vol,std_vol = ce.avg_variance(cov_type,g_type)
+                f.write(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+                f.write('\n')
+                print(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+    f.close()

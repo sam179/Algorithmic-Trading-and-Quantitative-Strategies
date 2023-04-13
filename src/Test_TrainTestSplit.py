@@ -4,7 +4,7 @@ import pandas as pd
 from TrainTestSplit import TrainTestSplit
 
 class Test_TrainTestSplit(unittest.TestCase):
-    tts = TrainTestSplit('5minReturn.csv',q=100)
+    tts = TrainTestSplit('normalized_returns.csv',q=0.5)
     def testConstructor(self):
         
         self.assertEqual(len(self.tts.data.columns),509) #need to change with full data set

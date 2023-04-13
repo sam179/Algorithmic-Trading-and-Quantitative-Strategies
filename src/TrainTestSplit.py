@@ -8,7 +8,7 @@ class TrainTestSplit():
     filePath = MyDirectories.BASE_DIR
 
     def __init__(self,filename,q=.5):
-        self.data = pd.read_csv(self.filePath/filename)
+        self.data = pd.read_csv(self.filePath/filename,index_col=[0])
         self.q = q
         self.train = {} # will be a dictionary K:1,2,3...fold number; V:index of train of that fold
         self.test = {} # same as self.train
@@ -16,19 +16,19 @@ class TrainTestSplit():
         self.test_size = int(3*self.train_size/5)
 
         # transform data
-        self.data['Time'] = self.data.apply(lambda x: pd.Timestamp.round(
-                            pd.to_datetime(
-                                x['MillisFromMidn'],
-                                unit = 'ms',
-                                origin=str(x.Date)),
-                            freq = '5T'),
-                        axis = 1
-        )
-        self.data = (self.data
-            .pivot_table(values = 'Returns',index = ['Time'],columns = 'Ticker')
-            .reset_index()
-            .sort_values(by = ['Time'],ignore_index=True)
-        )
+        # self.data['Time'] = self.data.apply(lambda x: pd.Timestamp.round(
+        #                     pd.to_datetime(
+        #                         x['MillisFromMidn'],
+        #                         unit = 'ms',
+        #                         origin=str(x.Date)),
+        #                     freq = '5T'),
+        #                 axis = 1
+        # )
+        # self.data = (self.data
+        #     .pivot_table(values = 'Returns',index = ['Time'],columns = 'Ticker')
+        #     .reset_index()
+        #     .sort_values(by = ['Time'],ignore_index=True)
+        # )
         
         
     
