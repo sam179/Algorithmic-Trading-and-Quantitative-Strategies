@@ -62,4 +62,9 @@ class TAQQuotesReader(object):
     
     def getBidPrice( self, index ):
         return self._bp[ index ]
-    
+
+    def getPrice(self, index):
+        return (self._ap[index] + self._bp[index]) / 2
+
+    def getTimestamp(self, index ):
+        return self.getMillisFromMidn( index ) # Compatibility
