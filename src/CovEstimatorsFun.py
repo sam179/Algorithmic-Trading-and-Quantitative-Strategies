@@ -16,6 +16,7 @@ def min_var_weight(cov,test_set,n_stocks = 499,type = 'min_variance'):
     type: which type of g; choice of "min_variance","omniscient", and "random"
     '''
     cov = np.array(cov)
+    cov_inv = np.linalg.inv(cov)
     test_set = np.array(test_set)
     if type == 'min_variance':
         g = np.ones(n_stocks)
@@ -25,7 +26,7 @@ def min_var_weight(cov,test_set,n_stocks = 499,type = 'min_variance'):
         g = np.random.rand(n_stocks)
         g = (g/np.linalg.norm(g))* np.sqrt(n_stocks)
 
-    return np.dot(cov,g)/(g@cov@g)
+    return np.dot(cov_inv,g)/(g.T@cov_inv@g)
 
 
 
