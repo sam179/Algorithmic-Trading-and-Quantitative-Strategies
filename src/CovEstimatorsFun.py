@@ -26,7 +26,7 @@ def min_var_weight(cov,test_set,n_stocks = 499,type = 'min_variance'):
         g = np.random.rand(n_stocks)
         g = (g/np.linalg.norm(g))* np.sqrt(n_stocks)
 
-    return np.dot(cov_inv,g)/(g.T@cov_inv@g)
+    return np.dot(cov_inv, g)/(g.T @ cov_inv @ g)
 
 
 
@@ -62,7 +62,8 @@ class CovEstimators():
             test_data = self.splitObj.get_test_set(i)
             cov = cov_cal(train_data,type = cov_type)
             w = min_var_weight(cov,test_data,type = g_type)
-            vol.append(np.sqrt(w.T@cov@w*252*78))
+            cov_test = cov_cal(test_data,type = cov_type)
+            vol.append(np.sqrt((w.T @ cov_test @ w)*252*78))
         return np.mean(vol),np.std(vol)
 
 
@@ -70,8 +71,8 @@ class CovEstimators():
 if __name__=="__main__":
     ce = CovEstimators('normalized_returns.csv')
     with open(MyDirectories.getRecordDir()/'covEstimatorResult.txt',mode='a') as f:
-        for cov_type in ['empirical','clipped','optimalShrinkage']:
-            for g_type in ["min_variance","omniscient","random"]:
+        for g_type in ["min_variance", "omniscient", "random"]:
+            for cov_type in ['empirical','clipped','optimalShrinkage']:
                 avg_vol,std_vol = ce.avg_variance(cov_type,g_type)
                 f.write(f'{cov_type} {g_type} {avg_vol} {std_vol}')
                 f.write('\n')
