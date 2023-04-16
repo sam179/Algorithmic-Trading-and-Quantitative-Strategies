@@ -13,7 +13,7 @@ class TrainTestSplit():
         self.train = {} # will be a dictionary K:1,2,3...fold number; V:index of train of that fold
         self.test = {} # same as self.train
         self.train_size = int(500/self.q) #size for each train set
-        self.test_size = int(3*self.train_size/5)
+        self.test_size = 78
 
         # transform data
         # self.data['Time'] = self.data.apply(lambda x: pd.Timestamp.round(
