@@ -32,7 +32,33 @@ def min_var_weight(cov,test_set,n_stocks = 499,type = 'min_variance'):
 
     return np.dot(cov_inv, g)/(g.T @ cov_inv @ g)
 
+def ewrm_estimator(data, alpha=0.94):
+    """
+    Computes the Exponentially Weighted Random Matrices estimator for a given set of data.
 
+    Args:
+        data (ndarray): Input data array.
+        alpha (float): Exponential weighting parameter.
+
+    Returns:
+        ndarray: The filtered data using EWRM.
+    """
+    # Initialize the covariance matrix
+    cov_matrix = np.cov(data.T)
+
+    # Initialize the filtered data
+    filtered_data = np.zeros_like(data)
+
+    # Loop through the data and compute the EWRM estimator
+    for i in range(len(data)):
+        if i == 0:
+            cov_matrix = 1/len(data)*alpha * np.outer(data[i], data[i])
+        else:
+            # Update the covariance matrix with the new data point
+            cov_matrix = (1-alpha) * np.outer(data[i], data[i]) + (alpha) * cov_matrix
+
+
+    return cov_matrix 
 
 def cov_cal(data,type = 'empirical'):
     '''
@@ -47,8 +73,11 @@ def cov_cal(data,type = 'empirical'):
     elif type== "clipped":
         return pyRMT.clipped(data,return_covariance=True)
 
-    else:
+    elif type=='optimalShrinkage':
         return pyRMT.optimalShrinkage(data,return_covariance=True)
+    
+    elif type=='ewrm':
+        return ewrm_estimator(data)
 
 class CovEstimators():
 
@@ -125,27 +154,28 @@ if __name__=="__main__":
     ce = CovEstimators('normalized_returns.csv')
     #ce.visual_compare('optimalShrinkage','omniscent')
     with open(MyDirectories.getRecordDir()/'covEstimatorResult.txt',mode='a') as f:
-        f.write('induced turnovers')
-        f.write('\n')
+        # f.write('induced turnovers')
+        # f.write('\n')
         for g_type in ['min_variance',"omniscient",'random']:
-            for cov_type in ['empirical','clipped','optimalShrinkage']:
-                # if cov_type == 'empirical':
-                #     avg_vol,std_vol,inSample_vol,inSample_std = ce.avg_variance(cov_type,g_type,inSample=True)
-                #     f.write(f'{cov_type} {g_type} {avg_vol} {std_vol}')
-                #     f.write('\n')
-                #     f.write(f'{cov_type} {g_type} inSample {inSample_vol} {inSample_std}')
-                #     f.write('\n')
-                #     print(f'{cov_type} {g_type} {avg_vol} {std_vol}')
-                #     print(f'{cov_type} {g_type} inSample {inSample_vol} {inSample_std}')
-                # else:
-                #     avg_vol,std_vol = ce.avg_variance(cov_type,g_type)
-                #     f.write(f'{cov_type} {g_type} {avg_vol} {std_vol}')
-                #     f.write('\n')
-                #     print(f'{cov_type} {g_type} {avg_vol} {std_vol}')
-                it = ce.induced_turnover(cov_type,g_type)
-                f.write(f'{cov_type} {g_type} {it}')
-                f.write('\n')
-                print(f'{cov_type} {g_type} {it}')
+            for cov_type in ['ewrm']:#['empirical','clipped','optimalShrinkage']:
+                if cov_type == 'empirical':
+                    avg_vol,std_vol,inSample_vol,inSample_std = ce.avg_variance(cov_type,g_type,inSample=True)
+                    f.write(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+                    f.write('\n')
+                    f.write(f'{cov_type} {g_type} inSample {inSample_vol} {inSample_std}')
+                    f.write('\n')
+                    print(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+                    print(f'{cov_type} {g_type} inSample {inSample_vol} {inSample_std}')
+                else:
+                    avg_vol,std_vol = ce.avg_variance(cov_type,g_type)
+                    f.write(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+                    f.write('\n')
+                    print(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+            
+                # it = ce.induced_turnover(cov_type,g_type)
+                # f.write(f'{cov_type} {g_type} {it}')
+                # f.write('\n')
+                # print(f'{cov_type} {g_type} {it}')
 
                 
     f.close()
