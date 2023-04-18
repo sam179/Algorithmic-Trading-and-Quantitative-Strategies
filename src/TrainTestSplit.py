@@ -8,7 +8,7 @@ class TrainTestSplit():
     filePath = MyDirectories.BASE_DIR
 
     def __init__(self,filename,q=.5):
-        self.data = pd.read_csv(self.filePath/filename,index_col=[0])
+        self.data = pd.read_csv(self.filePath/filename,index_col=[0]).dropna(axis=1)
         self.q = q
         self.train = {} # will be a dictionary K:1,2,3...fold number; V:index of train of that fold
         self.test = {} # same as self.train
