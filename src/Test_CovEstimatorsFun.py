@@ -29,7 +29,24 @@ class Test_CovEstimator(unittest.TestCase):
         cov = np.cov(self.ce.splitObj.get_train_set(0))
         cov2 = cf.cov_cal(self.ce.splitObj.get_train_set(0))
         self.assertAlmostEqual(cov[0][0],cov2[0][0],5)
-        
+        train_data = ce.splitObj.get_train_set(0)
+
+        cov_type = 'optimalShrinkage'
+        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 3.17694534e-03, places=6)
+
+        cov_type = 'clipped'
+        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 0.00317695, places=6)
+
+        cov_type = 'empirical'
+        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 3.17682995e-03, places=6)
+
+        cov_type = 'ewrm'
+        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 8.49027983e-03, places=6)
+
         # corner cases:data is empty
         cov3 = cf.cov_cal(data=pd.DataFrame())
         self.assertIsNone(cov3)
