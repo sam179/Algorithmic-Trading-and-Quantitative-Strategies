@@ -9,6 +9,8 @@ from FileManager import FileManager
 from TAQCAPM import *
 from ImpactModel import ImpactModel
 import time
+from CovEstimatorsFun import CovEstimators
+import CovEstimatorsFun as cf
 import matplotlib.pyplot as plt
 from scipy import stats
 
@@ -51,16 +53,35 @@ if __name__ == "__main__":
     # turnover = obj.turnOver("20070620", "20070920")
     # print(f"The market portfolio turnover is {turnover*100}%")
 
-    tic = time.time()
-    imm = ImpactModel(window=10)
-    # d_dates, d_stocks = imm.processAllData()
-    # print(d_dates, d_stocks)
-    print("Regression run for all stocks")
-    imm.generalNLS(status='all', num_iter=1000)
-    print("Regression run for active stocks")
-    imm.generalNLS(status='active', num_iter=1000)
-    print("Regression run for inactive stocks")
-    imm.generalNLS(status='inactive', num_iter=1000)
-    print(f"Time taken = {(time.time() - tic)/60} minutes")
+    # tic = time.time()
+    # imm = ImpactModel(window=10)
+    # # d_dates, d_stocks = imm.processAllData()
+    # # print(d_dates, d_stocks)
+    # print("Regression run for all stocks")
+    # imm.generalNLS(status='all', num_iter=1000)
+    # print("Regression run for active stocks")
+    # imm.generalNLS(status='active', num_iter=1000)
+    # print("Regression run for inactive stocks")
+    # imm.generalNLS(status='inactive', num_iter=1000)
+    # print(f"Time taken = {(time.time() - tic)/60} minutes")
+
+    ce = CovEstimators('returns.csv')
+
+    for g_type in ["min_variance", "omniscient", "random"]:
+        for cov_type in ['ewrm','empirical','clipped','optimalShrinkage']:
+            if cov_type == 'empirical':
+                avg_vol,std_vol,inSample_vol,inSample_std = ce.avg_variance(cov_type,g_type,inSample=True)
+                print(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+                print(f'{cov_type} {g_type} inSample {inSample_vol} {inSample_std}')
+            else:
+                avg_vol,std_vol = ce.avg_variance(cov_type,g_type)
+                print(f'{cov_type} {g_type} {avg_vol} {std_vol}')
+
+            it = ce.induced_turnover(cov_type,g_type)
+            print(f'{cov_type} {g_type} {it}')
+
+            ce.visual_compare(cov_type,g_type)
+
+
 
 
