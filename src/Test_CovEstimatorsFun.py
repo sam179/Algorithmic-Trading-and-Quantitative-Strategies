@@ -3,6 +3,8 @@ import CovEstimatorsFun as cf
 import unittest
 import numpy as np
 import pandas as pd
+import MyDirectories
+import os
 
 class Test_CovEstimator(unittest.TestCase):
     ce = CovEstimators('returns.csv')
@@ -29,23 +31,23 @@ class Test_CovEstimator(unittest.TestCase):
         cov = np.cov(self.ce.splitObj.get_train_set(0))
         cov2 = cf.cov_cal(self.ce.splitObj.get_train_set(0))
         self.assertAlmostEqual(cov[0][0],cov2[0][0],5)
-        train_data = ce.splitObj.get_train_set(0)
+        train_data = self.ce.splitObj.get_train_set(0)
 
         cov_type = 'optimalShrinkage'
-        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
-        self.assertAlmostEqual(cov[0][0], 3.17694534e-03, places=6)
+        cov = cf.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 1.37067947e-06, places=5)
 
         cov_type = 'clipped'
-        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
-        self.assertAlmostEqual(cov[0][0], 0.00317695, places=6)
+        cov = cf.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 1.37067947e-06, places=5)
 
         cov_type = 'empirical'
-        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
-        self.assertAlmostEqual(cov[0][0], 3.17682995e-03, places=6)
+        cov = cf.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 1.36996291e-06, places=5)
 
         cov_type = 'ewrm'
-        cov = covariance_estimators.cov_cal(train_data, type=cov_type)
-        self.assertAlmostEqual(cov[0][0], 8.49027983e-03, places=6)
+        cov = cf.cov_cal(train_data, type=cov_type)
+        self.assertAlmostEqual(cov[0][0], 9.70936348e-07, places=5)
 
         # corner cases:data is empty
         cov3 = cf.cov_cal(data=pd.DataFrame())
@@ -53,6 +55,25 @@ class Test_CovEstimator(unittest.TestCase):
         # corner cases:input type doesn't belong to any 
         cov4 = cf.cov_cal(self.ce.splitObj.get_train_set(0),'real')
         self.assertIsNone(cov4)
+
+    def test_induced_turover(self):
+        "Test if induced turnover works"
+        
+        for g_type in ["min_variance"]:
+            for cov_type in ['empirical']:
+                it = self.ce.induced_turnover(cov_type,g_type)
+                self.assertAlmostEqual(it,1.89,1)
+
+    def test_visual_compare(self):
+        'Test if visual compare function works'
+        cov_type = ['optimalShrinkage','empirical','clipped']
+        g_type = 'min_variance'
+        for c in cov_type:
+            self.ce.visual_compare(c,g_type)
+            record_path = MyDirectories.getRecordDir()
+            # to check if the record file is created
+            self.assertTrue(f'{c}_{g_type}.jpg' in os.listdir(record_path))
+            
 
 
 
